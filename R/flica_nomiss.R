@@ -9,6 +9,12 @@
 #' @export
 #'
 #' @examples
+#' # Save data at "./MATLAB_code/flica/data_nomiss.mat"
+#' #writeMat("./MATLAB_code/flica/data_nomiss.mat",
+#' #         mod1_true = mod1_true, mod2_true = mod2_true  # simulated data w/ no missing (before standardization, code in matlab will do the standardization)
+#' #         )
+#' # Run LICA on no-miss data
+#' #re_nomiss = flica_nomiss(ncomp = 5, flica_niter = 1500)
 flica_nomiss = function(ncomp, flica_niter){
 
   ncomp = ncomp; flica_niter = flica_niter

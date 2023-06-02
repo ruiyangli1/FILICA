@@ -17,3 +17,11 @@ The resulting dataset is the results estimated from LICA
 \description{
 This function calls the matlab function to run LICA on no-missing data
 }
+\examples{
+# Save data at "./MATLAB_code/flica/data_nomiss.mat"
+#writeMat("./MATLAB_code/flica/data_nomiss.mat",
+#         mod1_true = mod1_true, mod2_true = mod2_true  # simulated data w/ no missing (before standardization, code in matlab will do the standardization)
+#         )
+# Run LICA on no-miss data
+#re_nomiss = flica_nomiss(ncomp = 5, flica_niter = 1500)
+}
