@@ -12,7 +12,7 @@
 #' # Save data at "./MATLAB_code/flica/data_replace0.mat"
 #' #writeMat("./MATLAB_code/flica/data_replace0.mat",
 #' #         mod1_miss = mod1_replace0, mod2_miss = mod2_replace0,      # data with missing as 0
-#' #         mod1_std = mod1_replace0_std, mod2_std = mod2_replace0_std # data with missing as 0 after standardization
+#' #         mod1_std = mod1_replace0_std, mod2_std = mod2_replace0_std # data with missing as 0 after standardization; code in matlab will use this
 #' #         )
 #' # Run current practice: replace NA with 0 + LICA
 #' #re_replace0 = try(flica_replace0(ncomp = 5, flica_niter = 1500))
