@@ -53,7 +53,7 @@ breaks_log10 <- function(x) {
 * miss 5% of data
 
 ## LICA on no-missing data
-```{r fig.width = 6, fig.height = 6}
+```{r fig.width = 7, fig.height = 5}
 # generate data
 data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
   
@@ -116,7 +116,7 @@ dF %>%
 ```
 
 ## LICA on data after replacing missing with 0
-```{r fig.width = 6, fig.height = 6}
+```{r fig.width = 7, fig.height = 5}
 # generate data
 data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
@@ -197,7 +197,7 @@ dF %>%
 ```
 
 ## LICA on completers
-```{r fig.width = 6, fig.height = 6}
+```{r fig.width = 7, fig.height = 5}
 # generate data
 data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
@@ -275,7 +275,7 @@ dF %>%
 
 * current implementation of FI-LICA Step 1 needs the results from the completer analysis above
 
-```{r fig.width = 6, fig.height = 3}
+```{r fig.width = 7, fig.height = 3}
 # generate data
 data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
@@ -338,10 +338,10 @@ colnames(XW_filica) = paste0("est_comp", 1:5)
 
 ## convergence
 par(mfrow=c(1,2))
-plot(re_filica$H_convergence, ylab = "H_convergence", type="b")
-plot(re_filica$XW_convergence, ylab = "xw_convergence", type="b")
+plot(re_filica$H_convergence, ylab = "H_convergence", type="l")
+plot(re_filica$XW_convergence, ylab = "XW_convergence", type="l")
 ```
-```{r fig.width = 9, fig.height = 9}
+```{r fig.width = 11, fig.height = 9}
 ## dF curve
 F_hist = re_filica$F_hist
 F_hist_lag = lag(F_hist)
@@ -372,7 +372,7 @@ dF %>%
 * miss 5% of data
 
 ## LICA on no-missing data
-```{r fig.width = 6, fig.height = 6}
+```{r fig.width = 7, fig.height = 5}
 # generate data
 data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
   
@@ -435,7 +435,7 @@ dF %>%
 ```
 
 ## LICA on data after replacing missing with 0
-```{r fig.width = 6, fig.height = 6}
+```{r fig.width = 7, fig.height = 5}
 # generate data
 data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
@@ -516,7 +516,7 @@ dF %>%
 ```
 
 ## LICA on completers
-```{r fig.width = 6, fig.height = 6}
+```{r fig.width = 7, fig.height = 5}
 # generate data
 data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
@@ -594,7 +594,7 @@ dF %>%
 
 * current implementation of FI-LICA Step 1 needs the results from the completer analysis above
 
-```{r fig.width = 6, fig.height = 3}
+```{r fig.width = 7, fig.height = 3}
 # generate data
 data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
@@ -657,10 +657,10 @@ colnames(XW_filica) = paste0("est_comp", 1:5)
 
 ## convergence
 par(mfrow=c(1,2))
-plot(re_filica$H_convergence, ylab = "H_convergence", type="b")
-plot(re_filica$XW_convergence, ylab = "xw_convergence", type="b")
+plot(re_filica$H_convergence, ylab = "H_convergence", type="l")
+plot(re_filica$XW_convergence, ylab = "XW_convergence", type="l")
 ```
-```{r fig.width = 9, fig.height = 9}
+```{r fig.width = 11, fig.height = 9}
 ## dF curve
 F_hist = re_filica$F_hist
 F_hist_lag = lag(F_hist)
