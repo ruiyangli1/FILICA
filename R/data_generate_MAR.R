@@ -93,7 +93,8 @@ data_generate_MAR = function(nsubj = 100, nvoxel1 = 1000, nvoxel2 = 3000, true_n
        H = H, X1 = X1, X2 = X2, W1 = W1, W2 = W2, XW1 = XW1, XW2 = XW2,
        subj1 = subj1, subj2 = subj2, subj1_miss = subj1_miss, subj2_miss = subj2_miss, subj = subj,
        Y1_miss = as.matrix(Y1_miss), Y2_miss = as.matrix(Y2_miss), # data frame
-       seed = seed
+       seed = seed,
+       C1 = C1, C2 = C2
   )
 }
 
