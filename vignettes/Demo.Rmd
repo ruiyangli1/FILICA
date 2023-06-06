@@ -10,7 +10,6 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE, eval = FALSE, 
-  fig.width = 9, fig.height = 9, 
   comment = "#>"
 )
 ```
@@ -33,6 +32,8 @@ The same version of this file with *printed-out results* can also bee seen at ht
 # Load packages
 
 ```{r setup, message=FALSE,warning=FALSE}
+sessionInfo()[[1]][[13]]
+
 library(FILICA)
 library(tidyverse)
 library(matlabr)     # run matlab script
@@ -52,7 +53,7 @@ breaks_log10 <- function(x) {
 * miss 5% of data
 
 ## LICA on no-missing data
-```{r}
+```{r fig.width = 6, fig.height = 6}
 # generate data
 data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
   
@@ -115,9 +116,9 @@ dF %>%
 ```
 
 ## LICA on data after replacing missing with 0
-```{r}
+```{r fig.width = 6, fig.height = 6}
 # generate data
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
 # true components
 H_true = data$H
@@ -196,9 +197,9 @@ dF %>%
 ```
 
 ## LICA on completers
-```{r}
+```{r fig.width = 6, fig.height = 6}
 # generate data
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
 # true components
 H_true = data$H
@@ -274,9 +275,9 @@ dF %>%
 
 * current implementation of FI-LICA Step 1 needs the results from the completer analysis above
 
-```{r}
+```{r fig.width = 6, fig.height = 3}
 # generate data
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
 # true components
 H_true = data$H
@@ -335,10 +336,12 @@ XW_filica = do.call(rbind, lapply(1:mod_n, function(k){
   }))
 colnames(XW_filica) = paste0("est_comp", 1:5)
 
-## H convergence
-plot(re_filica$H_convergence, ylab = "H_convergence", type="l")
-plot(re_filica$XW_convergence, ylab = "xw_convergence", type="l")
-
+## convergence
+par(mfrow=c(1,2))
+plot(re_filica$H_convergence, ylab = "H_convergence", type="b")
+plot(re_filica$XW_convergence, ylab = "xw_convergence", type="b")
+```
+```{r fig.width = 9, fig.height = 9}
 ## dF curve
 F_hist = re_filica$F_hist
 F_hist_lag = lag(F_hist)
@@ -369,7 +372,7 @@ dF %>%
 * miss 5% of data
 
 ## LICA on no-missing data
-```{r}
+```{r fig.width = 6, fig.height = 6}
 # generate data
 data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
   
@@ -432,9 +435,9 @@ dF %>%
 ```
 
 ## LICA on data after replacing missing with 0
-```{r}
+```{r fig.width = 6, fig.height = 6}
 # generate data
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
 # true components
 H_true = data$H
@@ -513,9 +516,9 @@ dF %>%
 ```
 
 ## LICA on completers
-```{r}
+```{r fig.width = 6, fig.height = 6}
 # generate data
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
 # true components
 H_true = data$H
@@ -587,14 +590,13 @@ dF %>%
   theme_classic()
 ```
 
-
 ## FI-LICA
 
 * current implementation of FI-LICA Step 1 needs the results from the completer analysis above
 
-```{r}
+```{r fig.width = 6, fig.height = 3}
 # generate data
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
   
 # true components
 H_true = data$H
@@ -653,10 +655,12 @@ XW_filica = do.call(rbind, lapply(1:mod_n, function(k){
   }))
 colnames(XW_filica) = paste0("est_comp", 1:5)
 
-## H convergence
-plot(re_filica$H_convergence, ylab = "H_convergence", type="l")
-plot(re_filica$XW_convergence, ylab = "xw_convergence", type="l")
-
+## convergence
+par(mfrow=c(1,2))
+plot(re_filica$H_convergence, ylab = "H_convergence", type="b")
+plot(re_filica$XW_convergence, ylab = "xw_convergence", type="b")
+```
+```{r fig.width = 9, fig.height = 9}
 ## dF curve
 F_hist = re_filica$F_hist
 F_hist_lag = lag(F_hist)
@@ -678,6 +682,5 @@ dF %>%
   geom_hline(yintercept = 0.1, linetype = "dashed", color = "blue") + 
   theme_classic()
 ```
-
 
 
