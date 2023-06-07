@@ -32,7 +32,7 @@ The same version of this file with *printed-out results* can also bee seen at ht
 # Load packages
 
 ```{r setup, message=FALSE,warning=FALSE}
-sessionInfo()[[1]][[13]]
+sessionInfo()[[1]]$version.string
 
 library(FILICA)
 library(tidyverse)
