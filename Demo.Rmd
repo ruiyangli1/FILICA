@@ -26,7 +26,7 @@ The FILICA package conducts the multimodal fusion using LICA while addressing th
 # Load packages
 
 ```{r setup, message=FALSE,warning=FALSE}
-sessionInfo()[[1]][[13]]
+sessionInfo()[[1]]$version.string
 
 library(FILICA)
 library(tidyverse)
