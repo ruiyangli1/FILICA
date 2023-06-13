@@ -27,7 +27,8 @@ The same version of this file with *printed-out results* can also bee seen at ht
 * Working directory should be set at the current `FILICA` folder
 * LICA is implemented using [MATLAB functions](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLICA), which will be called from R
 * All the MATLAB functions and code scripts are in the folder `./MATLAB_code/flica`, which should be placed under the `FILICA` folder
-* MATLAB scripts to run LICA are named as `code_*.m`. ***Please make sure to change the path to `your path/FILICA/MATLAB_code/flica` in each script based on your folder location!***
+* MATLAB scripts to run LICA are named as `code_*.m` (i.e., `code_completer.m`, `code_filica_update.m`, `code_nomiss.m`, `code_replace0.m`). ***Please make sure to change the path to `your path/FILICA/MATLAB_code/flica` in each script based on your folder location!***
+* Current version supports analysis for 2 modalities
 
 # Load packages
 
@@ -273,12 +274,10 @@ dF %>%
 
 ## FI-LICA
 
-* current implementation of FI-LICA Step 1 needs the results from the completer analysis above
-
 ```{r fig.width = 7, fig.height = 3}
 # generate data
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
-  
+data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5)
+
 # true components
 H_true = data$H
 H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
@@ -288,10 +287,10 @@ XWstack_true = rbind(data$XW1, data$XW2)
 subj1_miss = data$subj1_miss
 subj2_miss = data$subj2_miss
 # prepare subj by mod k, for ease of computation
-subj_miss = NULL; 
-subj_miss[[1]] = subj1_miss 
+subj_miss = NULL;
+subj_miss[[1]] = subj1_miss
 subj_miss[[2]] = subj2_miss
-  
+
 # miss-data: with NA for assigned missing subjects
 mod1_miss = data$Y1_miss
 mod2_miss = data$Y2_miss
@@ -304,25 +303,20 @@ mod_std = NULL
 mod_std[[1]] = mod1_std
 mod_std[[2]] = mod2_std
 
-# keep complete data from the standardized missing data (for step 1)
+# keep complete data from the standardized missing data
 mod_std_complete = data_complete(mod_std)
 mod1_std_cmplt = mod_std_complete[[1]]
 mod2_std_cmplt = mod_std_complete[[2]]
 
+# save data
+# completer
+writeMat("./MATLAB_code/flica/data_std.mat",
+         mod1_std = mod1_std, mod2_std = mod2_std, # data with missing as NA after standardization
+         mod1_std_cmplt = mod1_std_cmplt, mod2_std_cmplt = mod2_std_cmplt #complete data from above
+)
+
 # ---- FI-LICA ---- 
-message("< Running FI-LICA >")
-
-# run step 1: loaded from completer case analysis 
-re_step1 = filica_step1(re = re_completer, rescale = TRUE)
-message("check: dF = ", re_step1$last_dF)
-# results from step 1
-H_prev = re_step1$H
-XW_prev = re_step1$XW
-
-# run step 2
-message("Step 2: ( ", 20, " updates + ", 1000, " niter )")
-re_step2 = filica_step2(n = 20, ncomp = 5, flica_niter2 = 1000, H_prev = H_prev, XW_prev = XW_prev, rescale = TRUE)
-re_filica = re_step2
+re_filica = filica(ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE)
 
 # results
 ## number of modality
@@ -592,12 +586,10 @@ dF %>%
 
 ## FI-LICA
 
-* current implementation of FI-LICA Step 1 needs the results from the completer analysis above
-
 ```{r fig.width = 7, fig.height = 3}
 # generate data
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
-  
+data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5)
+
 # true components
 H_true = data$H
 H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
@@ -607,10 +599,10 @@ XWstack_true = rbind(data$XW1, data$XW2)
 subj1_miss = data$subj1_miss
 subj2_miss = data$subj2_miss
 # prepare subj by mod k, for ease of computation
-subj_miss = NULL; 
-subj_miss[[1]] = subj1_miss 
+subj_miss = NULL;
+subj_miss[[1]] = subj1_miss
 subj_miss[[2]] = subj2_miss
-  
+
 # miss-data: with NA for assigned missing subjects
 mod1_miss = data$Y1_miss
 mod2_miss = data$Y2_miss
@@ -623,25 +615,20 @@ mod_std = NULL
 mod_std[[1]] = mod1_std
 mod_std[[2]] = mod2_std
 
-# keep complete data from the standardized missing data (for step 1)
+# keep complete data from the standardized missing data
 mod_std_complete = data_complete(mod_std)
 mod1_std_cmplt = mod_std_complete[[1]]
 mod2_std_cmplt = mod_std_complete[[2]]
 
+# save data
+# completer
+writeMat("./MATLAB_code/flica/data_std.mat",
+         mod1_std = mod1_std, mod2_std = mod2_std, # data with missing as NA after standardization
+         mod1_std_cmplt = mod1_std_cmplt, mod2_std_cmplt = mod2_std_cmplt #complete data from above
+)
+
 # ---- FI-LICA ---- 
-message("< Running FI-LICA >")
-
-# run step 1: loaded from completer case analysis 
-re_step1 = filica_step1(re = re_completer, rescale = TRUE)
-message("check: dF = ", re_step1$last_dF)
-# results from step 1
-H_prev = re_step1$H
-XW_prev = re_step1$XW
-
-# run step 2
-message("Step 2: ( ", 20, " updates + ", 1000, " niter )")
-re_step2 = filica_step2(n = 20, ncomp = 5, flica_niter2 = 1000, H_prev = H_prev, XW_prev = XW_prev, rescale = TRUE)
-re_filica = re_step2
+re_filica = filica(ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE)
 
 # results
 ## number of modality
