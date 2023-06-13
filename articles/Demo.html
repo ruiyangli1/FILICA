@@ -99,11 +99,14 @@ functions</a>, which will be called from R</li>
 <li>All the MATLAB functions and code scripts are in the folder
 <code>./MATLAB_code/flica</code>, which should be placed under the
 <code>FILICA</code> folder</li>
-<li>MATLAB scripts to run LICA are named as <code>code_*.m</code>.
+<li>MATLAB scripts to run LICA are named as <code>code_*.m</code> (i.e.,
+<code>code_completer.m</code>, <code>code_filica_update.m</code>,
+<code>code_nomiss.m</code>, <code>code_replace0.m</code>).
 <strong><em>Please make sure to change the path to
 <code>your path/FILICA/MATLAB_code/flica</code> in each script based on
 your folder location!</em></strong>
 </li>
+<li>Current version supports analysis for 2 modalities</li>
 </ul>
 </div>
 <div class="section level2">
@@ -356,14 +359,10 @@ your folder location!</em></strong>
 <div class="section level3">
 <h3 id="fi-lica">FI-LICA<a class="anchor" aria-label="anchor" href="#fi-lica"></a>
 </h3>
-<ul>
-<li>current implementation of FI-LICA Step 1 needs the results from the
-completer analysis above</li>
-</ul>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># generate data</span></span>
-<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MAR.html">data_generate_MAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
-<span>  </span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MAR.html">data_generate_MAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># true components</span></span>
 <span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
 <span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
@@ -373,10 +372,10 @@ completer analysis above</li>
 <span><span class="va">subj1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj1_miss</span></span>
 <span><span class="va">subj2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj2_miss</span></span>
 <span><span class="co"># prepare subj by mod k, for ease of computation</span></span>
-<span><span class="va">subj_miss</span> <span class="op">=</span> <span class="cn">NULL</span>; </span>
-<span><span class="va">subj_miss</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">subj1_miss</span> </span>
+<span><span class="va">subj_miss</span> <span class="op">=</span> <span class="cn">NULL</span>;</span>
+<span><span class="va">subj_miss</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">subj1_miss</span></span>
 <span><span class="va">subj_miss</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">subj2_miss</span></span>
-<span>  </span>
+<span></span>
 <span><span class="co"># miss-data: with NA for assigned missing subjects</span></span>
 <span><span class="va">mod1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span></span>
 <span><span class="va">mod2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span></span>
@@ -389,25 +388,20 @@ completer analysis above</li>
 <span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod1_std</span></span>
 <span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod2_std</span></span>
 <span></span>
-<span><span class="co"># keep complete data from the standardized missing data (for step 1)</span></span>
+<span><span class="co"># keep complete data from the standardized missing data</span></span>
 <span><span class="va">mod_std_complete</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_complete.html">data_complete</a></span><span class="op">(</span><span class="va">mod_std</span><span class="op">)</span></span>
 <span><span class="va">mod1_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">mod2_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
+<span><span class="co"># save data</span></span>
+<span><span class="co"># completer</span></span>
+<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_std.mat"</span>,</span>
+<span>         mod1_std <span class="op">=</span> <span class="va">mod1_std</span>, mod2_std <span class="op">=</span> <span class="va">mod2_std</span>, <span class="co"># data with missing as NA after standardization</span></span>
+<span>         mod1_std_cmplt <span class="op">=</span> <span class="va">mod1_std_cmplt</span>, mod2_std_cmplt <span class="op">=</span> <span class="va">mod2_std_cmplt</span> <span class="co">#complete data from above</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># ---- FI-LICA ---- </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running FI-LICA &gt;"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># run step 1: loaded from completer case analysis </span></span>
-<span><span class="va">re_step1</span> <span class="op">=</span> <span class="fu"><a href="../reference/filica_step1.html">filica_step1</a></span><span class="op">(</span>re <span class="op">=</span> <span class="va">re_completer</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"check: dF = "</span>, <span class="va">re_step1</span><span class="op">$</span><span class="va">last_dF</span><span class="op">)</span></span>
-<span><span class="co"># results from step 1</span></span>
-<span><span class="va">H_prev</span> <span class="op">=</span> <span class="va">re_step1</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">XW_prev</span> <span class="op">=</span> <span class="va">re_step1</span><span class="op">$</span><span class="va">XW</span></span>
-<span></span>
-<span><span class="co"># run step 2</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Step 2: ( "</span>, <span class="fl">20</span>, <span class="st">" updates + "</span>, <span class="fl">1000</span>, <span class="st">" niter )"</span><span class="op">)</span></span>
-<span><span class="va">re_step2</span> <span class="op">=</span> <span class="fu"><a href="../reference/filica_step2.html">filica_step2</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter2 <span class="op">=</span> <span class="fl">1000</span>, H_prev <span class="op">=</span> <span class="va">H_prev</span>, XW_prev <span class="op">=</span> <span class="va">XW_prev</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">re_filica</span> <span class="op">=</span> <span class="va">re_step2</span></span>
+<span><span class="va">re_filica</span> <span class="op">=</span> <span class="fu"><a href="../reference/filica.html">filica</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span>, n <span class="op">=</span> <span class="fl">20</span>, flica_niter2 <span class="op">=</span> <span class="fl">1000</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># results</span></span>
 <span><span class="co">## number of modality</span></span>
@@ -680,14 +674,10 @@ completer analysis above</li>
 <div class="section level3">
 <h3 id="fi-lica-1">FI-LICA<a class="anchor" aria-label="anchor" href="#fi-lica-1"></a>
 </h3>
-<ul>
-<li>current implementation of FI-LICA Step 1 needs the results from the
-completer analysis above</li>
-</ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># generate data</span></span>
-<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MCAR.html">data_generate_MCAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
-<span>  </span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MCAR.html">data_generate_MCAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># true components</span></span>
 <span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
 <span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
@@ -697,10 +687,10 @@ completer analysis above</li>
 <span><span class="va">subj1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj1_miss</span></span>
 <span><span class="va">subj2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj2_miss</span></span>
 <span><span class="co"># prepare subj by mod k, for ease of computation</span></span>
-<span><span class="va">subj_miss</span> <span class="op">=</span> <span class="cn">NULL</span>; </span>
-<span><span class="va">subj_miss</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">subj1_miss</span> </span>
+<span><span class="va">subj_miss</span> <span class="op">=</span> <span class="cn">NULL</span>;</span>
+<span><span class="va">subj_miss</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">subj1_miss</span></span>
 <span><span class="va">subj_miss</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">subj2_miss</span></span>
-<span>  </span>
+<span></span>
 <span><span class="co"># miss-data: with NA for assigned missing subjects</span></span>
 <span><span class="va">mod1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span></span>
 <span><span class="va">mod2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span></span>
@@ -713,25 +703,20 @@ completer analysis above</li>
 <span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod1_std</span></span>
 <span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod2_std</span></span>
 <span></span>
-<span><span class="co"># keep complete data from the standardized missing data (for step 1)</span></span>
+<span><span class="co"># keep complete data from the standardized missing data</span></span>
 <span><span class="va">mod_std_complete</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_complete.html">data_complete</a></span><span class="op">(</span><span class="va">mod_std</span><span class="op">)</span></span>
 <span><span class="va">mod1_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">mod2_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
+<span><span class="co"># save data</span></span>
+<span><span class="co"># completer</span></span>
+<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_std.mat"</span>,</span>
+<span>         mod1_std <span class="op">=</span> <span class="va">mod1_std</span>, mod2_std <span class="op">=</span> <span class="va">mod2_std</span>, <span class="co"># data with missing as NA after standardization</span></span>
+<span>         mod1_std_cmplt <span class="op">=</span> <span class="va">mod1_std_cmplt</span>, mod2_std_cmplt <span class="op">=</span> <span class="va">mod2_std_cmplt</span> <span class="co">#complete data from above</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># ---- FI-LICA ---- </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running FI-LICA &gt;"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># run step 1: loaded from completer case analysis </span></span>
-<span><span class="va">re_step1</span> <span class="op">=</span> <span class="fu"><a href="../reference/filica_step1.html">filica_step1</a></span><span class="op">(</span>re <span class="op">=</span> <span class="va">re_completer</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"check: dF = "</span>, <span class="va">re_step1</span><span class="op">$</span><span class="va">last_dF</span><span class="op">)</span></span>
-<span><span class="co"># results from step 1</span></span>
-<span><span class="va">H_prev</span> <span class="op">=</span> <span class="va">re_step1</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">XW_prev</span> <span class="op">=</span> <span class="va">re_step1</span><span class="op">$</span><span class="va">XW</span></span>
-<span></span>
-<span><span class="co"># run step 2</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Step 2: ( "</span>, <span class="fl">20</span>, <span class="st">" updates + "</span>, <span class="fl">1000</span>, <span class="st">" niter )"</span><span class="op">)</span></span>
-<span><span class="va">re_step2</span> <span class="op">=</span> <span class="fu"><a href="../reference/filica_step2.html">filica_step2</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter2 <span class="op">=</span> <span class="fl">1000</span>, H_prev <span class="op">=</span> <span class="va">H_prev</span>, XW_prev <span class="op">=</span> <span class="va">XW_prev</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">re_filica</span> <span class="op">=</span> <span class="va">re_step2</span></span>
+<span><span class="va">re_filica</span> <span class="op">=</span> <span class="fu"><a href="../reference/filica.html">filica</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span>, n <span class="op">=</span> <span class="fl">20</span>, flica_niter2 <span class="op">=</span> <span class="fl">1000</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># results</span></span>
 <span><span class="co">## number of modality</span></span>
