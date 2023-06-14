@@ -18,11 +18,13 @@ load("flica_nomiss_info.mat")
 %% multimodal image data
 
 clear Y;
-Y{1} = mod1_true;
-Y{2} = mod2_true;
+for k = 1:mod_n
+    eval("Y{k} = mod" + k + "_true;")
+end
 
+% standardization
 clear Yc; 
-for k = 1:2
+for k = 1:mod_n
 
     Yc{k} = bsxfun(@minus, Y{k}, mean(Y{k},2)); % demean
 
@@ -44,8 +46,17 @@ opts.num_components = ncomp;tic;tstart = tic;Morig20 = flica(Yc, opts);%Morig20.
 
 %Morig20.icvar=icvar_perc(Yc,Morig20);
 
-clear mod1_true mod1_true_std mod2_true mod2_true_std Y Yc;
 
+% clean up objectives
+clear Y Yc;
+for k = 1:mod_n
+    eval("clear mod" + k + "_true;")
+end
+clear k;
+clear tmprms; 
+
+
+% save results
 save("results_nomiss.mat")
 
 

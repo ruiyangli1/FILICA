@@ -18,8 +18,9 @@ load("flica_completer_info.mat")
 %% multimodal image data
 
 clear Yc;
-Yc{1} = mod1_std_cmplt;
-Yc{2} = mod2_std_cmplt;
+for k = 1:mod_n
+    eval("Yc{k} = mod" + k + "_std_cmplt;")
+end
 
 
 %% do LICA
@@ -30,11 +31,17 @@ opts.num_components = ncomp;tic;tstart = tic;Morig20 = flica(Yc, opts);%Morig20.
 
 %Morig20.icvar=icvar_perc(Yc,Morig20);
 
-clear mod1_std mod1_std_cmplt mod2_std mod2_std_cmplt Yc;
+% clean up objectives
+clear Yc k tmprms;
+for k = 1:mod_n
+    eval("clear mod" + k + "_std_cmplt;")
+end
 
+
+% save results
 save("results_completer.mat")
 
 
 
 
- 
+  
