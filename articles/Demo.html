@@ -106,7 +106,6 @@ functions</a>, which will be called from R</li>
 <code>your path/FILICA/MATLAB_code/flica</code> in each script based on
 your folder location!</em></strong>
 </li>
-<li>Current version supports analysis for 2 modalities</li>
 </ul>
 </div>
 <div class="section level2">
@@ -138,32 +137,15 @@ your folder location!</em></strong>
 <h3 id="lica-on-no-missing-data">LICA on no-missing data<a class="anchor" aria-label="anchor" href="#lica-on-no-missing-data"></a>
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># generate data</span></span>
+<code class="sourceCode R"><span><span class="co"># -- generate data -- </span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MAR.html">data_generate_MAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co">#--- n_miss doesn't matter b/c will only use no-miss data from data_generate()</span></span>
-<span>  </span>
-<span><span class="co"># no-miss data</span></span>
-<span><span class="va">mod1_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1</span></span>
-<span><span class="va">mod2_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2</span></span>
+<span><span class="co"># prepare data in lists</span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Y1</span>, <span class="va">data</span><span class="op">$</span><span class="va">Y2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># true components</span></span>
-<span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">XWstack_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">XW1</span>, <span class="va">data</span><span class="op">$</span><span class="va">XW2</span><span class="op">)</span></span>
+<span><span class="co"># -- run LICA -- </span></span>
+<span><span class="va">re_nomiss</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="fl">1500</span>, method <span class="op">=</span> <span class="st">"nomiss"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># standardize no-miss data</span></span>
-<span><span class="va">mod1_true_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod1_true</span><span class="op">)</span></span>
-<span><span class="va">mod2_true_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod2_true</span><span class="op">)</span></span>
-<span>  </span>
-<span><span class="co"># save data</span></span>
-<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_nomiss.mat"</span>, </span>
-<span>         mod1_true <span class="op">=</span> <span class="va">mod1_true</span>, mod2_true <span class="op">=</span> <span class="va">mod2_true</span>,                <span class="co"># simulated data w/ no missing</span></span>
-<span>         mod1_true_std <span class="op">=</span> <span class="va">mod1_true_std</span>, mod2_true_std <span class="op">=</span> <span class="va">mod2_true_std</span> <span class="co"># simulated data w/ no missing after standardization</span></span>
-<span>         <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># LICA </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running LICA on no-miss data &gt;"</span><span class="op">)</span></span>
-<span><span class="va">re_nomiss</span> <span class="op">=</span> <span class="fu"><a href="../reference/flica_nomiss.html">flica_nomiss</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span><span class="op">)</span></span>
-<span>  </span>
+<span><span class="co"># -- results -- </span></span>
 <span><span class="co">## last dF</span></span>
 <span><span class="va">last_dF</span> <span class="op">=</span> <span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">]</span><span class="op">-</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Last dF = "</span>, <span class="va">last_dF</span><span class="op">)</span></span>
@@ -177,10 +159,6 @@ your folder location!</em></strong>
 <span>  <span class="va">re_nomiss</span><span class="op">[[</span><span class="st">"X"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">k</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">[[</span><span class="st">"W"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">k</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span> </span>
 <span>  <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">XWstack_nomiss</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"est_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## identify most cor component with true XW</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">XWstack_true</span>, <span class="va">XWstack_nomiss</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bestIC.html">bestIC</a></span><span class="op">(</span><span class="va">XWstack_true</span>, <span class="va">XWstack_nomiss</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## dF curve</span></span>
 <span><span class="va">F_hist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span></span>
@@ -202,54 +180,26 @@ your folder location!</em></strong>
 <h3 id="lica-on-data-after-replacing-missing-with-0">LICA on data after replacing missing with 0<a class="anchor" aria-label="anchor" href="#lica-on-data-after-replacing-missing-with-0"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># generate data</span></span>
+<code class="sourceCode R"><span><span class="co"># -- generate data -- </span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MAR.html">data_generate_MAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
-<span>  </span>
-<span><span class="co"># true components</span></span>
-<span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">XWstack_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">XW1</span>, <span class="va">data</span><span class="op">$</span><span class="va">XW2</span><span class="op">)</span></span>
+<span><span class="co"># prepare data in lists</span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span>, <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># assigned missing subjects</span></span>
-<span><span class="va">subj1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj1_miss</span></span>
-<span><span class="va">subj2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj2_miss</span></span>
-<span>  </span>
-<span><span class="co"># miss-data: with NA for assigned missing subjects</span></span>
-<span><span class="va">mod1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span></span>
-<span><span class="va">mod2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span></span>
+<span><span class="co"># -- run LICA -- </span></span>
+<span><span class="va">re_replace0</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="fl">1500</span>, method <span class="op">=</span> <span class="st">"replace0"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># replace NA w/ 0</span></span>
-<span><span class="va">mod1_replace0</span> <span class="op">=</span> <span class="va">mod1_miss</span>; <span class="va">mod1_replace0</span><span class="op">[</span>,<span class="va">subj1_miss</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="va">mod2_replace0</span> <span class="op">=</span> <span class="va">mod2_miss</span>; <span class="va">mod2_replace0</span><span class="op">[</span>,<span class="va">subj2_miss</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span></span>
-<span><span class="co"># standardize replace0 data</span></span>
-<span><span class="va">mod1_replace0_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod1_replace0</span><span class="op">)</span></span>
-<span><span class="va">mod2_replace0_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod2_replace0</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># save data</span></span>
-<span><span class="co"># replace NA w/ 0</span></span>
-<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_replace0.mat"</span>, </span>
-<span>         mod1_miss <span class="op">=</span> <span class="va">mod1_replace0</span>, mod2_miss <span class="op">=</span> <span class="va">mod2_replace0</span>,      <span class="co"># data with missing as 0</span></span>
-<span>         mod1_std <span class="op">=</span> <span class="va">mod1_replace0_std</span>, mod2_std <span class="op">=</span> <span class="va">mod2_replace0_std</span> <span class="co"># data with missing as 0 after standardization</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># LICA </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running current practice: replace NA with 0 + LICA &gt;"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"( "</span>, <span class="fl">1500</span>, <span class="st">" iterations )"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">re_replace0</span> <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/flica_replace0.html">flica_replace0</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># in case LICA stop early, reduce flica_niter (by 25%) and rerun LICA until it works</span></span>
+<span><span class="co"># in case LICA stop early (e.g., n_miss=20), reduce flica_niter (by 25%) and rerun LICA until it works</span></span>
 <span><span class="co"># stop if reduce 18 times but still not work</span></span>
 <span><span class="va">flica_niter_used</span> <span class="op">=</span> <span class="fl">1500</span></span>
 <span><span class="va">stop_count</span> <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="kw">while</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">re_replace0</span><span class="op">)</span> <span class="op">==</span> <span class="st">"try-error"</span> <span class="op">&amp;</span> <span class="va">stop_count</span> <span class="op">&lt;=</span> <span class="fl">18</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">flica_niter_used</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fl">0.75</span> <span class="op">*</span> <span class="va">flica_niter_used</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Re-running LICA &gt; ( "</span>, <span class="va">flica_niter_used</span>, <span class="st">" iterations )"</span><span class="op">)</span></span>
-<span>  <span class="va">re_replace0</span> <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/flica_replace0.html">flica_replace0</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="va">flica_niter_used</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">re_replace0</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="va">flica_niter_used</span>, method <span class="op">=</span> <span class="st">"replace0"</span><span class="op">)</span></span>
 <span>  <span class="va">stop_count</span> <span class="op">=</span> <span class="va">stop_count</span> <span class="op">+</span> <span class="fl">1</span></span>
 <span><span class="op">}</span></span>
 <span></span>
+<span><span class="co"># -- results -- </span></span>
 <span><span class="co">## last dF</span></span>
 <span><span class="va">last_dF</span> <span class="op">=</span> <span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">]</span><span class="op">-</span><span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Last dF = "</span>, <span class="va">last_dF</span><span class="op">)</span></span>
@@ -284,48 +234,15 @@ your folder location!</em></strong>
 <h3 id="lica-on-completers">LICA on completers<a class="anchor" aria-label="anchor" href="#lica-on-completers"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># generate data</span></span>
+<code class="sourceCode R"><span><span class="co"># -- generate data -- </span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MAR.html">data_generate_MAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
-<span>  </span>
-<span><span class="co"># true components</span></span>
-<span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">XWstack_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">XW1</span>, <span class="va">data</span><span class="op">$</span><span class="va">XW2</span><span class="op">)</span></span>
+<span><span class="co"># prepare data in lists</span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span>, <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># assigned missing subjects</span></span>
-<span><span class="va">subj1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj1_miss</span></span>
-<span><span class="va">subj2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj2_miss</span></span>
-<span>  </span>
-<span><span class="co"># miss-data: with NA for assigned missing subjects</span></span>
-<span><span class="va">mod1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span></span>
-<span><span class="va">mod2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span></span>
+<span><span class="co"># -- run LICA -- </span></span>
+<span><span class="va">re_completer</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="fl">1500</span>, method <span class="op">=</span> <span class="st">"completer"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># standardize missing data (step 0)</span></span>
-<span><span class="va">mod1_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod1_miss</span><span class="op">)</span></span>
-<span><span class="va">mod2_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod2_miss</span><span class="op">)</span></span>
-<span><span class="co"># prepare std data by mod k, for ease of computation</span></span>
-<span><span class="va">mod_std</span> <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod1_std</span></span>
-<span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod2_std</span></span>
-<span></span>
-<span><span class="co"># keep complete data from the standardized missing data</span></span>
-<span><span class="va">mod_std_complete</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_complete.html">data_complete</a></span><span class="op">(</span><span class="va">mod_std</span><span class="op">)</span></span>
-<span><span class="va">mod1_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">mod2_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># save data</span></span>
-<span><span class="co"># completer</span></span>
-<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_std.mat"</span>, </span>
-<span>         mod1_std <span class="op">=</span> <span class="va">mod1_std</span>, mod2_std <span class="op">=</span> <span class="va">mod2_std</span>, <span class="co"># data with missing as NA after standardization</span></span>
-<span>         mod1_std_cmplt <span class="op">=</span> <span class="va">mod1_std_cmplt</span>, mod2_std_cmplt <span class="op">=</span> <span class="va">mod2_std_cmplt</span> <span class="co">#complete data from above</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># LICA </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running LICA on completers &gt;"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"( "</span>, <span class="fl">1500</span>, <span class="st">" iterations )"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">re_completer</span> <span class="op">=</span> <span class="fu"><a href="../reference/flica_completer.html">flica_completer</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span><span class="op">)</span></span>
-<span></span>
+<span><span class="co"># -- results -- </span></span>
 <span><span class="co">## last dF</span></span>
 <span><span class="va">last_dF</span> <span class="op">=</span> <span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">]</span><span class="op">-</span><span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Last dF = "</span>, <span class="va">last_dF</span><span class="op">)</span></span>
@@ -453,32 +370,15 @@ your folder location!</em></strong>
 <h3 id="lica-on-no-missing-data-1">LICA on no-missing data<a class="anchor" aria-label="anchor" href="#lica-on-no-missing-data-1"></a>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># generate data</span></span>
+<code class="sourceCode R"><span><span class="co"># -- generate data -- </span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MCAR.html">data_generate_MCAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co">#--- n_miss doesn't matter b/c will only use no-miss data from data_generate()</span></span>
-<span>  </span>
-<span><span class="co"># no-miss data</span></span>
-<span><span class="va">mod1_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1</span></span>
-<span><span class="va">mod2_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2</span></span>
+<span><span class="co"># prepare data in lists</span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Y1</span>, <span class="va">data</span><span class="op">$</span><span class="va">Y2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># true components</span></span>
-<span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">XWstack_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">XW1</span>, <span class="va">data</span><span class="op">$</span><span class="va">XW2</span><span class="op">)</span></span>
+<span><span class="co"># -- run LICA -- </span></span>
+<span><span class="va">re_nomiss</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="fl">1500</span>, method <span class="op">=</span> <span class="st">"nomiss"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># standardize no-miss data</span></span>
-<span><span class="va">mod1_true_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod1_true</span><span class="op">)</span></span>
-<span><span class="va">mod2_true_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod2_true</span><span class="op">)</span></span>
-<span>  </span>
-<span><span class="co"># save data</span></span>
-<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_nomiss.mat"</span>, </span>
-<span>         mod1_true <span class="op">=</span> <span class="va">mod1_true</span>, mod2_true <span class="op">=</span> <span class="va">mod2_true</span>,                <span class="co"># simulated data w/ no missing</span></span>
-<span>         mod1_true_std <span class="op">=</span> <span class="va">mod1_true_std</span>, mod2_true_std <span class="op">=</span> <span class="va">mod2_true_std</span> <span class="co"># simulated data w/ no missing after standardization</span></span>
-<span>         <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># LICA </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running LICA on no-miss data &gt;"</span><span class="op">)</span></span>
-<span><span class="va">re_nomiss</span> <span class="op">=</span> <span class="fu"><a href="../reference/flica_nomiss.html">flica_nomiss</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span><span class="op">)</span></span>
-<span>  </span>
+<span><span class="co"># -- results -- </span></span>
 <span><span class="co">## last dF</span></span>
 <span><span class="va">last_dF</span> <span class="op">=</span> <span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">]</span><span class="op">-</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Last dF = "</span>, <span class="va">last_dF</span><span class="op">)</span></span>
@@ -492,10 +392,6 @@ your folder location!</em></strong>
 <span>  <span class="va">re_nomiss</span><span class="op">[[</span><span class="st">"X"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">k</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">[[</span><span class="st">"W"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">k</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span> </span>
 <span>  <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">XWstack_nomiss</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"est_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## identify most cor component with true XW</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">XWstack_true</span>, <span class="va">XWstack_nomiss</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bestIC.html">bestIC</a></span><span class="op">(</span><span class="va">XWstack_true</span>, <span class="va">XWstack_nomiss</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## dF curve</span></span>
 <span><span class="va">F_hist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">re_nomiss</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span></span>
@@ -517,54 +413,26 @@ your folder location!</em></strong>
 <h3 id="lica-on-data-after-replacing-missing-with-0-1">LICA on data after replacing missing with 0<a class="anchor" aria-label="anchor" href="#lica-on-data-after-replacing-missing-with-0-1"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># generate data</span></span>
+<code class="sourceCode R"><span><span class="co"># -- generate data -- </span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MCAR.html">data_generate_MCAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
-<span>  </span>
-<span><span class="co"># true components</span></span>
-<span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">XWstack_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">XW1</span>, <span class="va">data</span><span class="op">$</span><span class="va">XW2</span><span class="op">)</span></span>
+<span><span class="co"># prepare data in lists</span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span>, <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># assigned missing subjects</span></span>
-<span><span class="va">subj1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj1_miss</span></span>
-<span><span class="va">subj2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj2_miss</span></span>
-<span>  </span>
-<span><span class="co"># miss-data: with NA for assigned missing subjects</span></span>
-<span><span class="va">mod1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span></span>
-<span><span class="va">mod2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span></span>
+<span><span class="co"># -- run LICA -- </span></span>
+<span><span class="va">re_replace0</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="fl">1500</span>, method <span class="op">=</span> <span class="st">"replace0"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># replace NA w/ 0</span></span>
-<span><span class="va">mod1_replace0</span> <span class="op">=</span> <span class="va">mod1_miss</span>; <span class="va">mod1_replace0</span><span class="op">[</span>,<span class="va">subj1_miss</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="va">mod2_replace0</span> <span class="op">=</span> <span class="va">mod2_miss</span>; <span class="va">mod2_replace0</span><span class="op">[</span>,<span class="va">subj2_miss</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span></span>
-<span><span class="co"># standardize replace0 data</span></span>
-<span><span class="va">mod1_replace0_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod1_replace0</span><span class="op">)</span></span>
-<span><span class="va">mod2_replace0_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod2_replace0</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># save data</span></span>
-<span><span class="co"># replace NA w/ 0</span></span>
-<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_replace0.mat"</span>, </span>
-<span>         mod1_miss <span class="op">=</span> <span class="va">mod1_replace0</span>, mod2_miss <span class="op">=</span> <span class="va">mod2_replace0</span>,      <span class="co"># data with missing as 0</span></span>
-<span>         mod1_std <span class="op">=</span> <span class="va">mod1_replace0_std</span>, mod2_std <span class="op">=</span> <span class="va">mod2_replace0_std</span> <span class="co"># data with missing as 0 after standardization</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># LICA </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running current practice: replace NA with 0 + LICA &gt;"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"( "</span>, <span class="fl">1500</span>, <span class="st">" iterations )"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">re_replace0</span> <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/flica_replace0.html">flica_replace0</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># in case LICA stop early, reduce flica_niter (by 25%) and rerun LICA until it works</span></span>
+<span><span class="co"># in case LICA stop early (e.g., n_miss=20), reduce flica_niter (by 25%) and rerun LICA until it works</span></span>
 <span><span class="co"># stop if reduce 18 times but still not work</span></span>
 <span><span class="va">flica_niter_used</span> <span class="op">=</span> <span class="fl">1500</span></span>
 <span><span class="va">stop_count</span> <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="kw">while</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">re_replace0</span><span class="op">)</span> <span class="op">==</span> <span class="st">"try-error"</span> <span class="op">&amp;</span> <span class="va">stop_count</span> <span class="op">&lt;=</span> <span class="fl">18</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">flica_niter_used</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fl">0.75</span> <span class="op">*</span> <span class="va">flica_niter_used</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Re-running LICA &gt; ( "</span>, <span class="va">flica_niter_used</span>, <span class="st">" iterations )"</span><span class="op">)</span></span>
-<span>  <span class="va">re_replace0</span> <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/flica_replace0.html">flica_replace0</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="va">flica_niter_used</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">re_replace0</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="va">flica_niter_used</span>, method <span class="op">=</span> <span class="st">"replace0"</span><span class="op">)</span></span>
 <span>  <span class="va">stop_count</span> <span class="op">=</span> <span class="va">stop_count</span> <span class="op">+</span> <span class="fl">1</span></span>
 <span><span class="op">}</span></span>
 <span></span>
+<span><span class="co"># -- results -- </span></span>
 <span><span class="co">## last dF</span></span>
 <span><span class="va">last_dF</span> <span class="op">=</span> <span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">]</span><span class="op">-</span><span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_replace0</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Last dF = "</span>, <span class="va">last_dF</span><span class="op">)</span></span>
@@ -599,48 +467,15 @@ your folder location!</em></strong>
 <h3 id="lica-on-completers-1">LICA on completers<a class="anchor" aria-label="anchor" href="#lica-on-completers-1"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># generate data</span></span>
+<code class="sourceCode R"><span><span class="co"># -- generate data -- </span></span>
 <span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_generate_MCAR.html">data_generate_MCAR</a></span><span class="op">(</span>nsubj <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">7452</span>, n_miss <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
-<span>  </span>
-<span><span class="co"># true components</span></span>
-<span><span class="va">H_true</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">H</span></span>
-<span><span class="va">H_true_trans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">H_true</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"true_comp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">H_true_trans</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">XWstack_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">XW1</span>, <span class="va">data</span><span class="op">$</span><span class="va">XW2</span><span class="op">)</span></span>
+<span><span class="co"># prepare data in lists</span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span>, <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># assigned missing subjects</span></span>
-<span><span class="va">subj1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj1_miss</span></span>
-<span><span class="va">subj2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">subj2_miss</span></span>
-<span>  </span>
-<span><span class="co"># miss-data: with NA for assigned missing subjects</span></span>
-<span><span class="va">mod1_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y1_miss</span></span>
-<span><span class="va">mod2_miss</span> <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Y2_miss</span></span>
+<span><span class="co"># -- run LICA -- </span></span>
+<span><span class="va">re_completer</span> <span class="op">=</span> <span class="fu"><a href="../reference/LICA.html">LICA</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, niter <span class="op">=</span> <span class="fl">1500</span>, method <span class="op">=</span> <span class="st">"completer"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># standardize missing data (step 0)</span></span>
-<span><span class="va">mod1_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod1_miss</span><span class="op">)</span></span>
-<span><span class="va">mod2_std</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_standardization.html">data_standardization</a></span><span class="op">(</span><span class="va">mod2_miss</span><span class="op">)</span></span>
-<span><span class="co"># prepare std data by mod k, for ease of computation</span></span>
-<span><span class="va">mod_std</span> <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod1_std</span></span>
-<span><span class="va">mod_std</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">mod2_std</span></span>
-<span></span>
-<span><span class="co"># keep complete data from the standardized missing data</span></span>
-<span><span class="va">mod_std_complete</span> <span class="op">=</span> <span class="fu"><a href="../reference/data_complete.html">data_complete</a></span><span class="op">(</span><span class="va">mod_std</span><span class="op">)</span></span>
-<span><span class="va">mod1_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">mod2_std_cmplt</span> <span class="op">=</span> <span class="va">mod_std_complete</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># save data</span></span>
-<span><span class="co"># completer</span></span>
-<span><span class="fu">writeMat</span><span class="op">(</span><span class="st">"./MATLAB_code/flica/data_std.mat"</span>, </span>
-<span>         mod1_std <span class="op">=</span> <span class="va">mod1_std</span>, mod2_std <span class="op">=</span> <span class="va">mod2_std</span>, <span class="co"># data with missing as NA after standardization</span></span>
-<span>         mod1_std_cmplt <span class="op">=</span> <span class="va">mod1_std_cmplt</span>, mod2_std_cmplt <span class="op">=</span> <span class="va">mod2_std_cmplt</span> <span class="co">#complete data from above</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># LICA </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"&lt; Running LICA on completers &gt;"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"( "</span>, <span class="fl">1500</span>, <span class="st">" iterations )"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">re_completer</span> <span class="op">=</span> <span class="fu"><a href="../reference/flica_completer.html">flica_completer</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">5</span>, flica_niter <span class="op">=</span> <span class="fl">1500</span><span class="op">)</span></span>
-<span></span>
+<span><span class="co"># -- results -- </span></span>
 <span><span class="co">## last dF</span></span>
 <span><span class="va">last_dF</span> <span class="op">=</span> <span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">]</span><span class="op">-</span><span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">re_completer</span><span class="op">$</span><span class="va">F.history</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Last dF = "</span>, <span class="va">last_dF</span><span class="op">)</span></span>
