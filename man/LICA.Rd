@@ -12,16 +12,16 @@ LICA(
 )
 }
 \arguments{
-\item{data}{data in lists}
+\item{data}{data from different modalities in lists}
 
 \item{ncomp}{number of components to be used in LICA}
 
 \item{niter}{number of iterations to be used in LICA}
 
-\item{method}{LICA method ('nomiss','completer','replace0')}
+\item{method}{LICA method. nomiss: running LICA on no-missing data. completer: running LICA on complete cases. replace0: running LICA after replacing missing with 0s.}
 }
 \value{
-The resulting dataset includes the results estimated from LICA
+The resulting list includes the results estimated from LICA
 }
 \description{
 This function runs LICA for no-missing data and two current practices for missing data (complete case analysis and replaceing missing with 0s)

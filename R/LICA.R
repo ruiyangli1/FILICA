@@ -2,12 +2,12 @@
 #'
 #' @title Function to run LICA
 #' @description This function runs LICA for no-missing data and two current practices for missing data (complete case analysis and replaceing missing with 0s)
-#' @param data data in lists
+#' @param data data from different modalities in lists
 #' @param ncomp number of components to be used in LICA
 #' @param niter number of iterations to be used in LICA
-#' @param method LICA method ('nomiss','completer','replace0')
+#' @param method LICA method. nomiss: running LICA on no-missing data. completer: running LICA on complete cases. replace0: running LICA after replacing missing with 0s.
 #'
-#' @return The resulting dataset includes the results estimated from LICA
+#' @return The resulting list includes the results estimated from LICA
 #' @export
 #'
 #' @examples
