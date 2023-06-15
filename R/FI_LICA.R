@@ -1,24 +1,29 @@
 ## function to run FI-LICA
 #'
 #' @title Function to run FI-LICA
-#' @description This function runs FI-LICA. Note: current function only supports the analysis on 2 modalities.
+#' @description This function runs FI-LICA.
+#' @param data data from different modalities in lists
 #' @param n number of FI-LICA updates
 #' @param ncomp number of components to be used in LICA
-#' @param flica_niter number of iterations to be used in FI-LICA's Step 1 (completer case analysis)
-#' @param flica_niter2 number of iterations to be used in FI-LICA's Step 2
+#' @param flica_niter number of LICA iterations to be used in FI-LICA's Step 1 (initialization process; completer case analysis)
+#' @param flica_niter2 number of LICA iterations to be used in FI-LICA's Step 2 (optimization process)
 #' @param rescale rescale H and XW (default is TRUE)
+#' @param re_completer results from completer case analysis. Default is NULL and completer case analysis will be run and saved during the process; otherwise, the given results will be used.
 #'
-#' @return The resulting dataset includes the results estimated from FI-LICA, convergence measure for H and for XW, and the dF history in LICA
+#' @return The resulting list includes the estimated results, the convergence measures for H and for XW, and the dF history from FI-LICA
 #' @export
 #'
 #' @examples
 #' # generate data
 #' data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5)
-#' # data with missing
+#' # data with missing in lists
 #' data = list(data$Y1_miss, data$Y2_miss)
-#' # FI-LICA
-#' #re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE)
-FI_LICA = function(data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE){
+#' # run FI-LICA
+#' #re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL)
+#' # or
+#' #re_completer = LICA(data = data, ncomp = 5, niter = 1500, method = "completer")
+#' #re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = re_completer)
+FI_LICA = function(data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL){
 
   # modality number
   mod_n = length(data)
@@ -55,8 +60,10 @@ FI_LICA = function(data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1
   # Step 1
   message("< -- FI-LICA Step 1: Initialization -- >")
 
-  re_completer = LICA(data = data, ncomp = ncomp, niter = flica_niter, method = "completer")
-  assign("completer_results_saved_from_FILICA", re_completer, .GlobalEnv) ## to store the interim completer analysis
+  if (is.null(re_completer)) { # if already has the results from completer case analysis, use; otherwise, run it here
+    re_completer = LICA(data = data, ncomp = ncomp, niter = flica_niter, method = "completer")
+    assign("completer_results_saved_from_FILICA", re_completer, .GlobalEnv) ## to store the interim completer analysis
+  }
   ## last dF
   last_dF = re_completer$F.history[,length(re_completer$F.history)]-re_completer$F.history[,length(re_completer$F.history)-1]
   message("Last dF = ", last_dF)

@@ -10,31 +10,39 @@ FI_LICA(
   flica_niter = 1500,
   n = 20,
   flica_niter2 = 1000,
-  rescale = TRUE
+  rescale = TRUE,
+  re_completer = NULL
 )
 }
 \arguments{
+\item{data}{data from different modalities in lists}
+
 \item{ncomp}{number of components to be used in LICA}
 
-\item{flica_niter}{number of iterations to be used in FI-LICA's Step 1 (completer case analysis)}
+\item{flica_niter}{number of LICA iterations to be used in FI-LICA's Step 1 (initialization process; completer case analysis)}
 
 \item{n}{number of FI-LICA updates}
 
-\item{flica_niter2}{number of iterations to be used in FI-LICA's Step 2}
+\item{flica_niter2}{number of LICA iterations to be used in FI-LICA's Step 2 (optimization process)}
 
 \item{rescale}{rescale H and XW (default is TRUE)}
+
+\item{re_completer}{results from completer case analysis. Default is NULL and completer case analysis will be run and saved during the process; otherwise, the given results will be used.}
 }
 \value{
-The resulting dataset includes the results estimated from FI-LICA, convergence measure for H and for XW, and the dF history in LICA
+The resulting list includes the estimated results, the convergence measures for H and for XW, and the dF history from FI-LICA
 }
 \description{
-This function runs FI-LICA. Note: current function only supports the analysis on 2 modalities.
+This function runs FI-LICA.
 }
 \examples{
 # generate data
 data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5)
-# data with missing
+# data with missing in lists
 data = list(data$Y1_miss, data$Y2_miss)
-# FI-LICA
-#re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE)
+# run FI-LICA
+#re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL)
+# or
+#re_completer = LICA(data = data, ncomp = 5, niter = 1500, method = "completer")
+#re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = re_completer)
 }
