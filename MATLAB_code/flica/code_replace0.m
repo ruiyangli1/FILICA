@@ -33,11 +33,11 @@ opts.num_components = ncomp;tic;tstart = tic;Morig20 = flica(Yc, opts);%Morig20.
 %Morig20.icvar=icvar_perc(Yc,Morig20);
 
 % clean up objectives
-clear Yc k tmprms;
+clear Yc k;
 for k = 1:mod_n
     eval("clear mod" + k + "_std;")
 end
-
+clear k;
 
 % save results
 save("results_replace0.mat")
