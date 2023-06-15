@@ -7,16 +7,17 @@
 filica_step1(re, rescale = TRUE)
 }
 \arguments{
-\item{re}{the saved results from running LICA on completers}
+\item{re}{the saved results from completer case analysis using LICA}
 
 \item{rescale}{rescale H and XW (default is TRUE)}
 }
 \value{
-The resulting dataset includes the estimated H, XW, and the last dF from Step 1 in FI-LICA
+The resulting list includes the estimated H, XW, and the last dF from Step 1 in FI-LICA
 }
 \description{
-This function runs Step 1 in FI-LICA. Note: current function only supports the analysis on 2 or 3 modalities.
+This function runs Step 1 in FI-LICA.
 }
 \examples{
-#re_step1 = filica_step1(re = re_completer, rescale = TRUE)
+# run Step 1 in FI-LICA
+#re_step1 = filica_step1(re = re_completer, rescale = TRUE) ## need subj_miss, mod_std, mod_std_complete
 }

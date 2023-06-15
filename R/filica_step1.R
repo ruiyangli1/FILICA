@@ -1,15 +1,16 @@
 ## function to run Step 1 in FI-LICA
 #'
 #' @title Function to run Step 1 in FI-LICA
-#' @description This function runs Step 1 in FI-LICA. Note: current function only supports the analysis on 2 or 3 modalities.
-#' @param re the saved results from running LICA on completers
+#' @description This function runs Step 1 in FI-LICA.
+#' @param re the saved results from completer case analysis using LICA
 #' @param rescale rescale H and XW (default is TRUE)
 #'
-#' @return The resulting dataset includes the estimated H, XW, and the last dF from Step 1 in FI-LICA
+#' @return The resulting list includes the estimated H, XW, and the last dF from Step 1 in FI-LICA
 #' @export
 #'
 #' @examples
-#' #re_step1 = filica_step1(re = re_completer, rescale = TRUE)
+#' # run Step 1 in FI-LICA
+#' #re_step1 = filica_step1(re = re_completer, rescale = TRUE) ## need subj_miss, mod_std, mod_std_complete
 filica_step1 = function(re, rescale = TRUE){
 
   message("FI-LICA step 1 started. ")
@@ -92,26 +93,18 @@ filica_step1 = function(re, rescale = TRUE){
     colnames(H_est_miss) = paste0("X", subj_miss[[k]])
     return(H_est_miss)
   }))
-  name = colnames(mod_std_update[[1]])
-  colnames(H) = colnames(mod_std_complete[[1]])
-  H_prev = cbind(H, H_k_crude)
+  name = colnames(mod_std_update[[1]]) ## name of all subjects
+  colnames(H) = colnames(mod_std_complete[[1]]) ## completers
+  H_prev = cbind(H, H_k_crude) ## combine subjects
   H_prev = H_prev[,name] # reorder subjects
-  #sd(as.vector(H_prev)) # 1.334572
 
-  # save data: [has to change manually]
-  if (mod_n == 3){
-    writeMat("./MATLAB_code/flica/data_std_update.mat",
-             mod1_std = mod_std_update[[1]],
-             mod2_std = mod_std_update[[2]],
-             mod3_std = mod_std_update[[3]],
-             H = H_prev)
-  }
-  if (mod_n == 2){
-    writeMat("./MATLAB_code/flica/data_std_update.mat",
-             mod1_std = mod_std_update[[1]],
-             mod2_std = mod_std_update[[2]],
-             H = H_prev)
-  }
+  # save data
+  filename = "'./MATLAB_code/flica/data_std_update.mat'"
+  eval(parse(text = paste('writeMat(',filename,',',
+                          paste0(paste('mod', 1:mod_n, '_std = mod_std_update[[',1:mod_n,']]', sep=''),
+                                 collapse=','),
+                          ', H = H_prev, mod_n = mod_n)',
+                          sep='') ))
 
   message("Done.")
 

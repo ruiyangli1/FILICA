@@ -1,7 +1,7 @@
 ## function to run Step 2 in FI-LICA
 #'
 #' @title Function to run Step 2 in FI-LICA
-#' @description This function runs Step 2 in FI-LICA. Note: current function only supports the analysis on 2 or 3 modalities.
+#' @description This function runs Step 2 in FI-LICA.
 #' @param n number of FI-LICA updates
 #' @param ncomp number of components to be used in LICA
 #' @param flica_niter2 number of iterations to be used in LICA
@@ -9,12 +9,12 @@
 #' @param XW_prev the estimated XW from Step 1
 #' @param rescale rescale H and XW (default is TRUE)
 #'
-#' @return The resulting dataset includes the results estimated from Step 2 in FI-LICA, convergence measure for H and for XW, and the dF history in LICA
+#' @return The resulting list includes the estimated results, convergence measure for H and for XW, and the dF history from Step 2 in FI-LICA
 #' @export
 #'
 #' @examples
 #' # results from Step 1 in FI-LICA
-#' #re_step1 = filica_step1(re = re_completer, rescale = TRUE)
+#' #re_step1 = filica_step1(re = re_completer, rescale = TRUE) ## need subj_miss, mod_std, mod_std_complete
 #' # run Step 2 in FI-LICA
 #' #re_step2 = filica_step2(n = 20, ncomp = 5, flica_niter2 = 1000, H_prev = re_step1$H, XW_prev = re_step1$XW, rescale = TRUE)
 filica_step2 = function(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE){
@@ -31,12 +31,12 @@ filica_step2 = function(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE)
   message("FI-LICA step 2 started.")
 
   for (j in 1:n) {
-    message("FI-LICA iteration ", j, " started. ")
+    message("Update ", j, " started. ")
 
     a = run_matlab_script("./MATLAB_code/flica/code_filica_update.m", verbose = FALSE)
 
     # to indicate whether flica can be run without error
-    if (j == 1 & !(a == 0)) { # NEWLY ADDED: if first iteration failed, stop
+    if (j == 1 & !(a == 0)) { # if first update failed, stop
       message("flica failed. Process stopped.")
       re = NULL
       break
@@ -46,6 +46,7 @@ filica_step2 = function(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE)
       message("flica worked. ")
     } else {
       message("flica failed. Process stopped.")
+      re = NULL
       break
     }
 
@@ -110,20 +111,14 @@ filica_step2 = function(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE)
       return(mod_std[[k]])
     })
 
-    # save data: [has to change manually]
-    if (mod_n == 3){
-      writeMat("./MATLAB_code/flica/data_std_update.mat",
-               mod1_std = mod_std_update[[1]],
-               mod2_std = mod_std_update[[2]],
-               mod3_std = mod_std_update[[3]],
-               H = H)
-    }
-    if (mod_n == 2){
-      writeMat("./MATLAB_code/flica/data_std_update.mat",
-               mod1_std = mod_std_update[[1]],
-               mod2_std = mod_std_update[[2]],
-               H = H)
-    }
+    # save data
+    filename = "'./MATLAB_code/flica/data_std_update.mat'"
+    eval(parse(text = paste('writeMat(',filename,',',
+                            paste0(paste('mod', 1:mod_n, '_std = mod_std_update[[',1:mod_n,']]', sep=''),
+                                   collapse=','),
+                            ', H = H, mod_n = mod_n)',
+                            sep='') ))
+
 
     # compute Frobenius-norm on change in H, and in weighted X
     H_convergence[j] = sqrt(sum((H-H_prev)^2))
