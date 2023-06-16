@@ -14,30 +14,42 @@ knitr::opts_chunk$set(
 )
 ```
 
+This `FILICA` R package conducts the Full Information Linked ICA algorithm (FI-LICA) to handle the missing data problem in multimodal fusion under the LICA framework.
+
 # About 
 
-The FILICA package conducts the multimodal fusion using LICA while addressing the missing data problem. 
-
-This file demonstrates the implementation of FI-LICA in R, under both MAR and MCAR settings. 
+In this file, we will demonstrate the implementation of FI-LICA, as well as LICA, in R, under both MAR and MCAR settings. 
 
 The same version of this file with *printed-out results* can also bee seen at https://github.com/ruiyangli1/FILICA, named as `Demo.html`
 
-# Note
 
-* Working directory should be set at the current `FILICA` folder
+*Note:*
+
 * LICA is implemented using [MATLAB functions](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLICA), which will be called from R
-* All the MATLAB functions and code scripts are in the folder `./MATLAB_code/flica`, which should be placed under the `FILICA` folder
-* MATLAB scripts to run LICA are named as `code_*.m` (i.e., `code_completer.m`, `code_filica_update.m`, `code_nomiss.m`, `code_replace0.m`). ***Please make sure to change the path to `your path/FILICA/MATLAB_code/flica` in each script based on your folder location!***
+* All the MATLAB functions and code scripts are in the folder `./MATLAB_code/flica` from our [GitHub website](https://github.com/ruiyangli1/FILICA)
+  * MATLAB scripts to be called from R to run LICA are named as `code_*.m` (i.e., `code_completer.m`, `code_filica_update.m`, `code_nomiss.m`, `code_replace0.m`). ***Please make sure to change the path to `your path/FILICA/MATLAB_code/flica` in each script based on your folder location! Details in the User guideline section below.***
+* ***Caution***: DO NOT run FI-LICA and completer case analysis at the same time as code will interfere with each other! 
 
-# Load packages
+
+
+# User guideline
+
+* Create a new folder in your computer, named as `FILICA`, and set the working directory of R at the current `FILICA` folder
+* Download the `./MATLAB_code/flica` folder from our [GitHub website](https://github.com/ruiyangli1/FILICA), and place it under the `FILICA` folder
+* Open the following MATLAB scripts in the `FILICA/MATLAB_code/flica` folder: `code_completer.m`, `code_filica_update.m`, `code_nomiss.m`, `code_replace0.m`, and change the path in the first command line to **YOUR PATH`/FILICA/MATLAB_code/flica`** based on your folder location
+
+
+# Examples
+
+The following demonstrates how to use the functions in our FILICA package. 
+
+## Load packages
 
 ```{r setup, message=FALSE,warning=FALSE}
 sessionInfo()[[1]]$version.string
 
 library(FILICA)
 library(tidyverse)
-library(matlabr)     # run matlab script
-library(R.matlab)    # read matlab data formats into R
 
 library(scales)      # plot dF curve
 breaks_log10 <- function(x) {
@@ -48,20 +60,21 @@ breaks_log10 <- function(x) {
 ```
 
 
-# MAR setting 
+## MAR setting 
 
 * n = 100
 * miss 5% of data
 
-## LICA on no-missing data
+### LICA on no-missing data
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
 # prepare data in lists
 data = list(data$Y1, data$Y2)
 
 # -- run LICA -- 
 re_nomiss = LICA(data = data, ncomp = 5, niter = 1500, method = "nomiss")
+
 
 # -- results -- 
 ## last dF
@@ -95,10 +108,10 @@ dF %>%
   theme_classic()
 ```
 
-## LICA on data after replacing missing with 0
+### LICA on data after replacing missing with 0
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
+data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
 # prepare data in lists
 data = list(data$Y1_miss, data$Y2_miss)
 
@@ -115,6 +128,7 @@ while (class(re_replace0) == "try-error" & stop_count <= 18) {
   re_replace0 = LICA(data = data, ncomp = 5, niter = flica_niter_used, method = "replace0")
   stop_count = stop_count + 1
 }
+
 
 # -- results -- 
 ## last dF
@@ -148,15 +162,16 @@ dF %>%
   theme_classic()
 ```
 
-## LICA on completers
+### LICA on completers
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5) 
+data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
 # prepare data in lists
 data = list(data$Y1_miss, data$Y2_miss)
 
 # -- run LICA -- 
 re_completer = LICA(data = data, ncomp = 5, niter = 1500, method = "completer")
+
 
 # -- results -- 
 ## last dF
@@ -190,53 +205,20 @@ dF %>%
   theme_classic()
 ```
 
-## FI-LICA
+### FI-LICA
 
+* Results from the completer cases analysis (`completer_results_saved_from_FILICA`) will also be stored at the Environment during the process. 
 ```{r fig.width = 7, fig.height = 3}
-# generate data
-data = data_generate_MAR(nsubj = 100, seed = 7452, n_miss = 5)
+# -- generate data -- 
+data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+# prepare data in lists
+data = list(data$Y1_miss, data$Y2_miss)
 
-# true components
-H_true = data$H
-H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
-XWstack_true = rbind(data$XW1, data$XW2)
+# -- run FI-LICA -- 
+re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL)
+## or if want to use the saved results from completer case analysis: re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = re_completer)
 
-# assigned missing subjects
-subj1_miss = data$subj1_miss
-subj2_miss = data$subj2_miss
-# prepare subj by mod k, for ease of computation
-subj_miss = NULL;
-subj_miss[[1]] = subj1_miss
-subj_miss[[2]] = subj2_miss
-
-# miss-data: with NA for assigned missing subjects
-mod1_miss = data$Y1_miss
-mod2_miss = data$Y2_miss
-
-# standardize missing data (step 0)
-mod1_std = data_standardization(mod1_miss)
-mod2_std = data_standardization(mod2_miss)
-# prepare std data by mod k, for ease of computation
-mod_std = NULL
-mod_std[[1]] = mod1_std
-mod_std[[2]] = mod2_std
-
-# keep complete data from the standardized missing data
-mod_std_complete = data_complete(mod_std)
-mod1_std_cmplt = mod_std_complete[[1]]
-mod2_std_cmplt = mod_std_complete[[2]]
-
-# save data
-# completer
-writeMat("./MATLAB_code/flica/data_std.mat",
-         mod1_std = mod1_std, mod2_std = mod2_std, # data with missing as NA after standardization
-         mod1_std_cmplt = mod1_std_cmplt, mod2_std_cmplt = mod2_std_cmplt #complete data from above
-)
-
-# ---- FI-LICA ---- 
-re_filica = filica(ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE)
-
-# results
+# -- results --
 ## number of modality
 mod_n = length(re_filica$results[["X"]])
 ## H
@@ -277,231 +259,8 @@ dF %>%
 ```
 
 
-
-# MCAR setting
+## MCAR setting
 
 * n = 100
 * miss 5% of data
-
-## LICA on no-missing data
-```{r fig.width = 7, fig.height = 5}
-# -- generate data -- 
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
-# prepare data in lists
-data = list(data$Y1, data$Y2)
-
-# -- run LICA -- 
-re_nomiss = LICA(data = data, ncomp = 5, niter = 1500, method = "nomiss")
-
-# -- results -- 
-## last dF
-last_dF = re_nomiss$F.history[,length(re_nomiss$F.history)]-re_nomiss$F.history[,length(re_nomiss$F.history)-1]
-message("Last dF = ", last_dF)
-    
-## H
-H_nomiss = re_nomiss$H
-H_nomiss_trans = t(H_nomiss); colnames(H_nomiss_trans) = paste0("est_comp", 1:ncol(H_nomiss_trans))
-    
-## concatenated XW
-XWstack_nomiss = do.call(rbind, lapply(1:2, function(k){ 
-  re_nomiss[["X"]][[k]][[1]] %*% diag( as.vector(re_nomiss[["W"]][[k]][[1]]) ) 
-  }))
-colnames(XWstack_nomiss) = paste0("est_comp", 1:5)
-
-## dF curve
-F_hist = t(re_nomiss$F.history)
-F_hist_lag = lag(F_hist)
-dF = data.frame(dF = F_hist - F_hist_lag)
-dF$index = 1:nrow(dF)
-dF %>% 
-  ggplot(aes(x = index, y = dF)) + 
-  geom_point(alpha = 0.5) + 
-  geom_path() + 
-  annotation_logticks() +
-  scale_x_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  scale_y_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  labs(title = "dF curve") + 
-  geom_hline(yintercept = 0.1, linetype = "dashed", color = "blue") + 
-  theme_classic()
-```
-
-## LICA on data after replacing missing with 0
-```{r fig.width = 7, fig.height = 5}
-# -- generate data -- 
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
-# prepare data in lists
-data = list(data$Y1_miss, data$Y2_miss)
-
-# -- run LICA -- 
-re_replace0 = LICA(data = data, ncomp = 5, niter = 1500, method = "replace0")
-
-# in case LICA stop early (e.g., n_miss=20), reduce flica_niter (by 25%) and rerun LICA until it works
-# stop if reduce 18 times but still not work
-flica_niter_used = 1500
-stop_count = 1
-while (class(re_replace0) == "try-error" & stop_count <= 18) {
-  flica_niter_used = ceiling(0.75 * flica_niter_used)
-  message("< Re-running LICA > ( ", flica_niter_used, " iterations )")
-  re_replace0 = LICA(data = data, ncomp = 5, niter = flica_niter_used, method = "replace0")
-  stop_count = stop_count + 1
-}
-
-# -- results -- 
-## last dF
-last_dF = re_replace0$F.history[,length(re_replace0$F.history)]-re_replace0$F.history[,length(re_replace0$F.history)-1]
-message("Last dF = ", last_dF)
-    
-## H
-H_replace0 = re_replace0$H
-H_replace0_trans = t(H_replace0); colnames(H_replace0_trans) = paste0("est_comp", 1:ncol(H_replace0_trans))
-
-## concatenated XW
-XWstack_replace0 = do.call(rbind, lapply(1:2, function(k){ 
-  re_replace0[["X"]][[k]][[1]] %*% diag( as.vector(re_replace0[["W"]][[k]][[1]]) ) 
-  }))
-colnames(XWstack_replace0) = paste0("est_comp", 1:5)
-
-## dF curve
-F_hist = t(re_replace0$F.history)
-F_hist_lag = lag(F_hist)
-dF = data.frame(dF = F_hist - F_hist_lag)
-dF$index = 1:nrow(dF)
-dF %>% 
-  ggplot(aes(x = index, y = dF)) + 
-  geom_point(alpha = 0.5) + 
-  geom_path() + 
-  annotation_logticks() +
-  scale_x_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  scale_y_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  labs(title = "dF curve") + 
-  geom_hline(yintercept = 0.1, linetype = "dashed", color = "blue") + 
-  theme_classic()
-```
-
-## LICA on completers
-```{r fig.width = 7, fig.height = 5}
-# -- generate data -- 
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
-# prepare data in lists
-data = list(data$Y1_miss, data$Y2_miss)
-
-# -- run LICA -- 
-re_completer = LICA(data = data, ncomp = 5, niter = 1500, method = "completer")
-
-# -- results -- 
-## last dF
-last_dF = re_completer$F.history[,length(re_completer$F.history)]-re_completer$F.history[,length(re_completer$F.history)-1]
-message("Last dF = ", last_dF)
-
-## H
-H_completer = re_completer$H
-H_completer_trans = t(H_completer); colnames(H_completer_trans) = paste0("est_comp", 1:ncol(H_completer_trans))
-
-## concatenated XW
-XWstack_completers = do.call(rbind, lapply(1:2, function(k){ 
-  re_completer[["X"]][[k]][[1]] %*% diag( as.vector(re_completer[["W"]][[k]][[1]]) ) 
-  }))
-colnames(XWstack_completers) = paste0("est_comp", 1:5)
-
-## dF curve
-F_hist = t(re_completer$F.history)
-F_hist_lag = lag(F_hist)
-dF = data.frame(dF = F_hist - F_hist_lag)
-dF$index = 1:nrow(dF)
-dF %>% 
-  ggplot(aes(x = index, y = dF)) + 
-  geom_point(alpha = 0.5) + 
-  geom_path() + 
-  annotation_logticks() +
-  scale_x_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  scale_y_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  labs(title = "dF curve") + 
-  geom_hline(yintercept = 0.1, linetype = "dashed", color = "blue") + 
-  theme_classic()
-```
-
-## FI-LICA
-
-```{r fig.width = 7, fig.height = 3}
-# generate data
-data = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5)
-
-# true components
-H_true = data$H
-H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
-XWstack_true = rbind(data$XW1, data$XW2)
-
-# assigned missing subjects
-subj1_miss = data$subj1_miss
-subj2_miss = data$subj2_miss
-# prepare subj by mod k, for ease of computation
-subj_miss = NULL;
-subj_miss[[1]] = subj1_miss
-subj_miss[[2]] = subj2_miss
-
-# miss-data: with NA for assigned missing subjects
-mod1_miss = data$Y1_miss
-mod2_miss = data$Y2_miss
-
-# standardize missing data (step 0)
-mod1_std = data_standardization(mod1_miss)
-mod2_std = data_standardization(mod2_miss)
-# prepare std data by mod k, for ease of computation
-mod_std = NULL
-mod_std[[1]] = mod1_std
-mod_std[[2]] = mod2_std
-
-# keep complete data from the standardized missing data
-mod_std_complete = data_complete(mod_std)
-mod1_std_cmplt = mod_std_complete[[1]]
-mod2_std_cmplt = mod_std_complete[[2]]
-
-# save data
-# completer
-writeMat("./MATLAB_code/flica/data_std.mat",
-         mod1_std = mod1_std, mod2_std = mod2_std, # data with missing as NA after standardization
-         mod1_std_cmplt = mod1_std_cmplt, mod2_std_cmplt = mod2_std_cmplt #complete data from above
-)
-
-# ---- FI-LICA ---- 
-re_filica = filica(ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE)
-
-# results
-## number of modality
-mod_n = length(re_filica$results[["X"]])
-## H
-H_filica = re_filica$results$H
-H_filica_trans = t(H_filica); colnames(H_filica_trans) = paste0("est_comp", 1:ncol(H_filica_trans))
-## concatenated XW
-XW_filica = do.call(rbind, lapply(1:mod_n, function(k){ 
-  re_filica$results[["X"]][[k]][[1]] %*% diag( as.vector(re_filica$results[["W"]][[k]][[1]]) ) 
-  }))
-colnames(XW_filica) = paste0("est_comp", 1:5)
-
-## convergence
-par(mfrow=c(1,2))
-plot(re_filica$H_convergence, ylab = "H_convergence", type="l")
-plot(re_filica$XW_convergence, ylab = "XW_convergence", type="l")
-```
-```{r fig.width = 11, fig.height = 9}
-## dF curve
-F_hist = re_filica$F_hist
-F_hist_lag = lag(F_hist)
-dF = data.frame(F_hist - F_hist_lag)
-colnames(dF) = paste0("update", 1:20)
-dF$index = 1:nrow(dF)
-dF %>% 
-  pivot_longer(1:20, names_to = "update", values_to = "dF") %>% 
-  mutate(update = factor(update,levels = paste0("update",1:20))) %>% 
-  filter(update %in% c(paste0("update",1:20))) %>% 
-  ggplot(aes(x = index, y = dF)) + 
-  geom_point(alpha = 0.5) + 
-  geom_path() + 
-  facet_wrap(~update) +
-  annotation_logticks() +
-  scale_x_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  scale_y_log10(breaks = breaks_log10,labels = trans_format(log10, math_format(10^.x))) +
-  labs(title = "dF curve in FI-LICA Step 2") + 
-  geom_hline(yintercept = 0.1, linetype = "dashed", color = "blue") + 
-  theme_classic()
-```
+* same code as above, expect using `data_generate_MCAR`() instead of `data_generate_MAR_ctnsH()` for data generation
