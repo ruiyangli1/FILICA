@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_generate_MAR.R
 \name{data_generate_MAR}
 \alias{data_generate_MAR}
-\title{Data generation function for MAR}
+\title{Data generation function for MAR (with H from a mixture distribution)}
 \usage{
 data_generate_MAR(
   nsubj = 100,
@@ -28,15 +28,15 @@ data_generate_MAR(
 
 \item{n_miss}{number of missing subjects}
 
-\item{es_C1H1}{effect size for C1 and H1}
+\item{es_C1H1}{correlation between the first covariate (C1, continuous) and the first component of H (H1)}
 
-\item{es_C2H2}{effect size for C2 and H2}
+\item{es_C2H2}{cohen's d between the second covariate (C2, binary) and the second component of H (H2)}
 }
 \value{
 The resulting dataset has lists including the no-missing data (Y1, Y2), order of subjects who were implemented missing (subj1_miss, subj2_miss), missing data (Y1_miss, Y2_miss), and other intermediate parameters during the data generation process.
 }
 \description{
-This function generates the simulation data (2 modalities) under the setting of MAR
+This function generates the simulation data (2 modalities) for the setting of MAR, with one continuous covariate (C1), one binary covariate (C2), and H from a mixture distribution based on C1 and C2
 }
 \examples{
 dat = data_generate_MAR(nsubj = 100, seed = 1234, n_miss = 5); names(dat)
