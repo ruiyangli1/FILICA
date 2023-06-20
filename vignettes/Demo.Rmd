@@ -39,11 +39,12 @@ The same version of this file with *printed-out results* can also bee seen at ht
 * Open the following MATLAB scripts in the `FILICA/MATLAB_code/flica` folder: `code_completer.m`, `code_filica_update.m`, `code_nomiss.m`, `code_replace0.m`, and change the path in the first command line to **YOUR PATH`/FILICA/MATLAB_code/flica`** based on your folder location
 
 
-# Examples
+--- 
+
 
 The following demonstrates how to use the functions in our FILICA package. 
 
-## Load packages
+# Load packages
 
 ```{r setup, message=FALSE,warning=FALSE}
 sessionInfo()[[1]]$version.string
@@ -60,12 +61,12 @@ breaks_log10 <- function(x) {
 ```
 
 
-## MAR setting 
+# MAR setting 
 
 * n = 100
 * miss 5% of data
 
-### LICA on no-missing data
+## LICA on no-missing data
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
 data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
@@ -108,7 +109,7 @@ dF %>%
   theme_classic()
 ```
 
-### LICA on data after replacing missing with 0
+## LICA on data after replacing missing with 0
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
 data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
@@ -162,7 +163,7 @@ dF %>%
   theme_classic()
 ```
 
-### LICA on completers
+## LICA on completers
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
 data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
@@ -205,7 +206,7 @@ dF %>%
   theme_classic()
 ```
 
-### FI-LICA
+## FI-LICA
 
 * Results from the completer cases analysis (`completer_results_saved_from_FILICA`) will also be stored at the Environment during the process. 
 ```{r fig.width = 7, fig.height = 3}
@@ -259,7 +260,7 @@ dF %>%
 ```
 
 
-## MCAR setting
+# MCAR setting
 
 * n = 100
 * miss 5% of data
