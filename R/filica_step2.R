@@ -87,22 +87,26 @@ filica_step2 = function(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE)
 
     set.seed(1)
     Y_pred = lapply(1:mod_n, function(k){
-      # each mod k:
-      # noise: voxel x missing_subj
-      ## randomly take missing_subj_# of lambdas from its completers
-      lambda_sample = sample(re$lambda[[k]][[1]], length(subj_miss[[k]]))
-      ## generate E ~ N(0, 1/lambda) for each missing_subj, with length voxel
-      E = do.call(cbind, lapply(1:length(lambda_sample), function(i){
-        rnorm(nrow(XW_k[[k]]), mean = 0, sd = 1/lambda_sample[i]) }))
+      # each mod k {w/ missing subject}:
 
-      # estimate Y for missing subj in mod k
-      H_est_miss = H[,subj_miss[[k]]]
-      Y_pred_miss = XW_k[[k]] %*% H_est_miss
-      Y_pred_miss_addE = XW_k[[k]] %*% H_est_miss + E
+      if (length(subj_miss[[k]])>0) {
 
-      return(list(lambda_sample = lambda_sample, E = E,
-                  H_est_miss = H_est_miss,
-                  Y_pred_miss = Y_pred_miss, Y_pred_miss_addE = Y_pred_miss_addE))
+        # noise: voxel x missing_subj
+        ## randomly take missing_subj_# of lambdas from its completers
+        lambda_sample = sample(re$lambda[[k]][[1]], length(subj_miss[[k]]))
+        ## generate E ~ N(0, 1/lambda) for each missing_subj, with length voxel
+        E = do.call(cbind, lapply(1:length(lambda_sample), function(i){
+          rnorm(nrow(XW_k[[k]]), mean = 0, sd = 1/lambda_sample[i]) }))
+
+        # estimate Y for missing subj in mod k
+        H_est_miss = H[,subj_miss[[k]]]
+        Y_pred_miss = XW_k[[k]] %*% H_est_miss
+        Y_pred_miss_addE = XW_k[[k]] %*% H_est_miss + E
+
+        return(list(lambda_sample = lambda_sample, E = E,
+                    H_est_miss = H_est_miss,
+                    Y_pred_miss = Y_pred_miss, Y_pred_miss_addE = Y_pred_miss_addE))
+      }
     })
 
     # replace missing (standardized scale)

@@ -48,33 +48,37 @@ filica_step1 = function(re, rescale = TRUE){
 
   set.seed(1)
   Y_pred = lapply(1:mod_n, function(k){
-    # each mod k:
-    # noise: voxel x missing_subj
-    ## randomly take missing_subj_# of lambdas from its completers
-    lambda_sample = sample(re$lambda[[k]][[1]], length(subj_miss[[k]]))
-    ## generate E ~ N(0, 1/lambda) for each missing_subj, with length voxel
-    E = do.call(cbind, lapply(1:length(lambda_sample), function(i){
-      rnorm(nrow(XW_k[[k]]), mean = 0, sd = 1/lambda_sample[i]) }))
+    # each mod k {w/ missing subject}:
 
-    XW_k_copy = XW_k
-    XW_this = XW_k_copy[[k]]
-    XW_k_copy[[k]] = NULL
-    XW_other = do.call(rbind,lapply(1:length(XW_k_copy), function(x){XW_k_copy[[x]]}))
+    if (length(subj_miss[[k]])>0) {
 
-    mod_std_copy = mod_std
-    mod_std_copy[[k]] = NULL
-    Y_other = do.call(rbind,lapply(1:length(mod_std_copy), function(y){mod_std_copy[[y]]}))
+      # noise: voxel x missing_subj
+      ## randomly take missing_subj_# of lambdas from its completers
+      lambda_sample = sample(re$lambda[[k]][[1]], length(subj_miss[[k]]))
+      ## generate E ~ N(0, 1/lambda) for each missing_subj, with length voxel
+      E = do.call(cbind, lapply(1:length(lambda_sample), function(i){
+        rnorm(nrow(XW_k[[k]]), mean = 0, sd = 1/lambda_sample[i]) }))
 
-    # estimate H for missing subj in mod k using mod -k (std) data
-    H_est = MASS::ginv(t(XW_other) %*% XW_other) %*% t(XW_other) %*% as.matrix(Y_other)
-    H_est_miss = H_est[,subj_miss[[k]]]
-    Y_pred_miss = XW_this %*% H_est_miss
-    Y_pred_miss_addE = XW_this %*% H_est_miss + E
+      XW_k_copy = XW_k
+      XW_this = XW_k_copy[[k]]
+      XW_k_copy[[k]] = NULL
+      XW_other = do.call(rbind,lapply(1:length(XW_k_copy), function(x){XW_k_copy[[x]]}))
 
-    return(list(lambda_sample = lambda_sample, E = E,
-                H_est = H_est, H_est_miss = H_est_miss,
-                Y_pred_miss = Y_pred_miss, Y_pred_miss_addE = Y_pred_miss_addE,
-                XW_other = XW_other, XW_this = XW_this))
+      mod_std_copy = mod_std
+      mod_std_copy[[k]] = NULL
+      Y_other = do.call(rbind,lapply(1:length(mod_std_copy), function(y){mod_std_copy[[y]]}))
+
+      # estimate H for missing subj in mod k using mod -k (std) data
+      H_est = MASS::ginv(t(XW_other) %*% XW_other) %*% t(XW_other) %*% as.matrix(Y_other)
+      H_est_miss = H_est[,subj_miss[[k]]]
+      Y_pred_miss = XW_this %*% H_est_miss
+      Y_pred_miss_addE = XW_this %*% H_est_miss + E
+
+      return(list(lambda_sample = lambda_sample, E = E,
+                  H_est = H_est, H_est_miss = H_est_miss,
+                  Y_pred_miss = Y_pred_miss, Y_pred_miss_addE = Y_pred_miss_addE,
+                  XW_other = XW_other, XW_this = XW_this))
+    }
   })
 
   # replace missing (standardized scale)
@@ -87,11 +91,13 @@ filica_step1 = function(re, rescale = TRUE){
   XW_prev = do.call(rbind, lapply(1:mod_n, function(k){XW_k[[k]]}))
 
   # save H (combined)
-  # estimated crude H for missing subj in each mod
+  # estimated crude H for missing subj in each mod {w/ missing subject}
   H_k_crude = do.call(cbind, lapply(1:mod_n, function(k){
-    H_est_miss = as.matrix(Y_pred[[k]]$H_est_miss)
-    colnames(H_est_miss) = paste0("X", subj_miss[[k]])
-    return(H_est_miss)
+    if (length(subj_miss[[k]])>0) {
+      H_est_miss = as.matrix(Y_pred[[k]]$H_est_miss)
+      colnames(H_est_miss) = paste0("X", subj_miss[[k]])
+      return(H_est_miss)
+    }
   }))
   name = colnames(mod_std_update[[1]]) ## name of all subjects
   colnames(H) = colnames(mod_std_complete[[1]]) ## completers
