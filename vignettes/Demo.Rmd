@@ -20,7 +20,7 @@ This `FILICA` R package conducts the Full Information Linked ICA algorithm (FI-L
 
 In this file, we will demonstrate the implementation of FI-LICA, as well as LICA, in R, under both MAR and MCAR settings. 
 
-The same version of this file with *printed-out results* can also bee seen at https://github.com/ruiyangli1/FILICA, named as `Demo.html`
+The same version of this file with *printed-out results* can also bee seen at our [GitHub website](https://github.com/ruiyangli1/FILICA), named as `Demo.html`. 
 
 
 *Note:*
@@ -42,16 +42,18 @@ The same version of this file with *printed-out results* can also bee seen at ht
 --- 
 
 
+# Examples
+
 The following demonstrates how to use the functions in our FILICA package. 
 
-# Load packages
+## Load packages
 
-```{r setup, message=FALSE,warning=FALSE}
+```{r setup}
 sessionInfo()[[1]]$version.string
 
 library(FILICA)
-library(tidyverse)
 
+library(tidyverse)   
 library(scales)      # plot dF curve
 breaks_log10 <- function(x) {
   low <- floor(log10(min(x)))
@@ -61,17 +63,17 @@ breaks_log10 <- function(x) {
 ```
 
 
-# MAR setting 
+## MAR setting (continuous H)
 
 * n = 100
 * miss 5% of data
 
-## LICA on no-missing data
+### LICA on no-missing data
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
 # prepare data in lists
-data = list(data$Y1, data$Y2)
+data = list(data0$Y1, data0$Y2)
 
 # -- run LICA -- 
 re_nomiss = LICA(data = data, ncomp = 5, niter = 1500, method = "nomiss")
@@ -109,12 +111,30 @@ dF %>%
   theme_classic()
 ```
 
-## LICA on data after replacing missing with 0
+```{r}
+## best-matching component 
+## truth
+XWstack_true = rbind(data0$XW1, data0$XW2)
+H_true = data0$H
+H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
+## XW
+best = bestIC(XWstack_true, XWstack_nomiss) 
+## H
+best_H = H_nomiss_trans[,paste0("est_",best[,"best_match"])]
+cor_H = cor(H_true_trans, best_H) 
+## output
+out = cbind(best, H_cor = as.numeric(diag(cor_H))) %>% as.data.frame() %>% mutate_at(3:4, as.numeric)
+colnames(out)[3] = "XW_cor"
+out
+```
+
+
+### LICA on data after replacing missing with 0
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
 # prepare data in lists
-data = list(data$Y1_miss, data$Y2_miss)
+data = list(data0$Y1_miss, data0$Y2_miss)
 
 # -- run LICA -- 
 re_replace0 = LICA(data = data, ncomp = 5, niter = 1500, method = "replace0")
@@ -163,12 +183,30 @@ dF %>%
   theme_classic()
 ```
 
-## LICA on completers
+```{r}
+## best-matching component 
+## truth
+XWstack_true = rbind(data0$XW1, data0$XW2)
+H_true = data0$H
+H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
+## XW
+best = bestIC(XWstack_true, XWstack_replace0) 
+## H
+best_H = H_replace0_trans[,paste0("est_",best[,"best_match"])]
+cor_H = cor(H_true_trans, best_H) 
+## output
+out = cbind(best, H_cor = as.numeric(diag(cor_H))) %>% as.data.frame() %>% mutate_at(3:4, as.numeric)
+colnames(out)[3] = "XW_cor"
+out
+```
+
+
+### LICA on completers
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
 # prepare data in lists
-data = list(data$Y1_miss, data$Y2_miss)
+data = list(data0$Y1_miss, data0$Y2_miss)
 
 # -- run LICA -- 
 re_completer = LICA(data = data, ncomp = 5, niter = 1500, method = "completer")
@@ -206,14 +244,36 @@ dF %>%
   theme_classic()
 ```
 
-## FI-LICA
+```{r}
+## best-matching component 
+## truth
+XWstack_true = rbind(data0$XW1, data0$XW2)
+H_true = data0$H
+H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
+## XW
+best = bestIC(XWstack_true, XWstack_completers) 
+## H
+best_H = H_completer_trans[,paste0("est_",best[,"best_match"])]
+all_miss_subj = sort(c(data0$subj1_miss,data0$subj2_miss))
+cor_H = cor(H_true_trans[-all_miss_subj,], best_H)
+## output
+out = cbind(best, H_cor = as.numeric(diag(cor_H))) %>% as.data.frame() %>% mutate_at(3:4, as.numeric)
+colnames(out)[3] = "XW_cor"
+out
+```
+
+
+### FI-LICA
 
 * Results from the completer cases analysis (`completer_results_saved_from_FILICA`) will also be stored at the Environment during the process. 
 ```{r fig.width = 7, fig.height = 3}
 # -- generate data -- 
-data = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+# subjects with missing -- will be automatically identified by FI_LICA() if not provided
+## Note: different missing subjects orders will lead to different results due to noise matrix added in step 2
+subj_miss = list(data0$subj1_miss, data0$subj2_miss)
 # prepare data in lists
-data = list(data$Y1_miss, data$Y2_miss)
+data = list(data0$Y1_miss, data0$Y2_miss)
 
 # -- run FI-LICA -- 
 re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL)
@@ -259,8 +319,32 @@ dF %>%
   theme_classic()
 ```
 
+```{r}
+## best-matching component 
+## truth
+XWstack_true = rbind(data0$XW1, data0$XW2)
+H_true = data0$H
+H_true_trans = t(H_true); colnames(H_true_trans) = paste0("true_comp", 1:ncol(H_true_trans))
+## XW
+best = bestIC(XWstack_true, XW_filica) 
+## H
+best_H = H_filica_trans[,paste0("est_",best[,"best_match"])]
+cor_H = cor(H_true_trans, best_H)
+## output
+out = cbind(best, H_cor = as.numeric(diag(cor_H))) %>% as.data.frame() %>% mutate_at(3:4, as.numeric)
+colnames(out)[3] = "XW_cor"
+out
+```
 
-# MCAR setting
+
+## MAR setting (mixed H)
+
+* n = 100
+* miss 5% of data
+* same code as above, expect using `data_generate_MAR`() instead of `data_generate_MAR_ctnsH()` for data generation
+
+
+## MCAR setting
 
 * n = 100
 * miss 5% of data
