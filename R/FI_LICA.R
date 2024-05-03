@@ -47,11 +47,13 @@ FI_LICA = function(data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1
   mod_std_complete = data_complete(mod_std)
   assign("mod_std_complete", mod_std_complete, .GlobalEnv) ## s.t. filica_step1() can use it
 
-  # subjects with missing
-  subj_miss = lapply(1:mod_n, function(k) {
-    as.numeric(which(colSums(is.na(data[[k]])) != 0))
-  })
-  assign("subj_miss", subj_miss, .GlobalEnv) ## s.t. filica_step1() can use it
+  # subjects with missing: get from missing data if not provided
+  if (!exists("subj_miss")) {
+    subj_miss = lapply(1:mod_n, function(k) {
+      as.numeric(which(colSums(is.na(data[[k]])) != 0))
+    })
+    assign("subj_miss", subj_miss, .GlobalEnv) ## s.t. filica_step1() can use it
+  }
 
   message("Done.")
 
