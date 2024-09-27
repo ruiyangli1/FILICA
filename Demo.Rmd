@@ -60,7 +60,7 @@ breaks_log10 <- function(x) {
 ```
 
 
-## MAR setting (continuous H)
+## MCAR setting
 
 * n = 100
 * miss 5% of data
@@ -68,7 +68,7 @@ breaks_log10 <- function(x) {
 ### LICA on no-missing data
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
+data0 = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) #--- n_miss doesn't matter b/c will only use no-miss data from data_generate()
 # prepare data in lists
 data = list(data0$Y1, data0$Y2)
 
@@ -129,7 +129,7 @@ out
 ### LICA on data after replacing missing with 0
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+data0 = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
 # prepare data in lists
 data = list(data0$Y1_miss, data0$Y2_miss)
 
@@ -201,7 +201,7 @@ out
 ### LICA on completers
 ```{r fig.width = 7, fig.height = 5}
 # -- generate data -- 
-data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+data0 = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
 # prepare data in lists
 data = list(data0$Y1_miss, data0$Y2_miss)
 
@@ -265,7 +265,7 @@ out
 * Results from the completer cases analysis (`completer_results_saved_from_FILICA`) will also be stored at the Environment during the process. 
 ```{r fig.width = 7, fig.height = 3}
 # -- generate data -- 
-data0 = data_generate_MAR_ctnsH(nsubj = 100, seed = 7452, n_miss = 5) 
+data0 = data_generate_MCAR(nsubj = 100, seed = 7452, n_miss = 5) 
 # subjects with missing -- will be automatically identified by FI_LICA() if not provided
 ## Note: different missing subjects orders will lead to different results due to noise matrix added in step 2
 subj_miss = list(data0$subj1_miss, data0$subj2_miss)
@@ -334,15 +334,16 @@ out
 ```
 
 
+## MAR setting (continuous H)
+
+* n = 100
+* miss 5% of data
+* same code as above, expect using `data_generate_MAR_ctnsH()` instead of `data_generate_MCAR()` for data generation
+
+
 ## MAR setting (mixed H)
 
 * n = 100
 * miss 5% of data
-* same code as above, expect using `data_generate_MAR`() instead of `data_generate_MAR_ctnsH()` for data generation
+* same code as above, expect using `data_generate_MAR`() instead of `data_generate_MCAR()` for data generation
 
-
-## MCAR setting
-
-* n = 100
-* miss 5% of data
-* same code as above, expect using `data_generate_MCAR`() instead of `data_generate_MAR_ctnsH()` for data generation
