@@ -9,7 +9,7 @@ This package conducts the Full Information Linked ICA algorithm (FI-LICA) to han
 
 ## Installation
 
-```{r}
+```
 ## install package
 # install.packages("devtools")
 devtools::install_github("ruiyangli1/FILICA")
