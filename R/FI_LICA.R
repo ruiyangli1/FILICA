@@ -9,6 +9,8 @@
 #' @param flica_niter2 number of LICA iterations to be used in FI-LICA's Step 2 (optimization process)
 #' @param rescale rescale H and XW (default is TRUE)
 #' @param re_completer results from completer case analysis. Default is NULL and completer case analysis will be run and saved during the process; otherwise, the given results will be used.
+#' @param seed1 seed for E generation for FI-LICA's Step 1. Default is 1.
+#' @param seed2 seed for E generation for FI-LICA's Step 2. Default is 1.
 #'
 #' @return The resulting list includes the estimated results, the convergence measures for H and for XW, and the dF history from FI-LICA
 #' @export
@@ -23,7 +25,7 @@
 #' # or
 #' #re_completer = LICA(data = data, ncomp = 5, niter = 1500, method = "completer")
 #' #re_filica = FI_LICA(data = data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = re_completer)
-FI_LICA = function(data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL){
+FI_LICA = function(data, ncomp = 5, flica_niter = 1500, n = 20, flica_niter2 = 1000, rescale = TRUE, re_completer = NULL, seed1 = 1, seed2 = 1){
 
   # modality number
   mod_n = length(data)

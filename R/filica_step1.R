@@ -4,6 +4,7 @@
 #' @description This function runs Step 1 in FI-LICA.
 #' @param re the saved results from completer case analysis using LICA
 #' @param rescale rescale H and XW (default is TRUE)
+#' @param seed1 seed for E generation for FI-LICA's Step 1. Default is 1.
 #'
 #' @return The resulting list includes the estimated H, XW, and the last dF from Step 1 in FI-LICA
 #' @export
@@ -11,7 +12,7 @@
 #' @examples
 #' # run Step 1 in FI-LICA
 #' #re_step1 = filica_step1(re = re_completer, rescale = TRUE) ## need subj_miss, mod_std, mod_std_complete
-filica_step1 = function(re, rescale = TRUE){
+filica_step1 = function(re, rescale = TRUE, seed1 = 1){
 
   message("FI-LICA step 1 started. ")
 
@@ -46,7 +47,7 @@ filica_step1 = function(re, rescale = TRUE){
     XW_k = XW_k_scaled
   }
 
-  set.seed(1)
+  set.seed(seed1)
   Y_pred = lapply(1:mod_n, function(k){
     # each mod k {w/ missing subject}:
 
@@ -54,10 +55,10 @@ filica_step1 = function(re, rescale = TRUE){
 
       # noise: voxel x missing_subj
       ## randomly take missing_subj_# of lambdas from its completers
-      lambda_sample = sample(re$lambda[[k]][[1]], length(subj_miss[[k]]))
+      lambda_sample = sample(re$lambda[[k]][[1]], length(subj_miss[[k]])) ### not with replacement
       ## generate E ~ N(0, 1/lambda) for each missing_subj, with length voxel
       E = do.call(cbind, lapply(1:length(lambda_sample), function(i){
-        rnorm(nrow(XW_k[[k]]), mean = 0, sd = 1/lambda_sample[i]) }))
+        rnorm(nrow(XW_k[[k]]), mean = 0, sd = 1/sqrt(lambda_sample[i])) }))
 
       XW_k_copy = XW_k
       XW_this = XW_k_copy[[k]]
