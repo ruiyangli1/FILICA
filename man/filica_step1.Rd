@@ -4,12 +4,14 @@
 \alias{filica_step1}
 \title{Function to run Step 1 in FI-LICA}
 \usage{
-filica_step1(re, rescale = TRUE)
+filica_step1(re, rescale = TRUE, seed1 = 1)
 }
 \arguments{
 \item{re}{the saved results from completer case analysis using LICA}
 
 \item{rescale}{rescale H and XW (default is TRUE)}
+
+\item{seed1}{seed for E generation for FI-LICA's Step 1. Default is 1.}
 }
 \value{
 The resulting list includes the estimated H, XW, and the last dF from Step 1 in FI-LICA

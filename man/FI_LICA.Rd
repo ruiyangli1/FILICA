@@ -11,7 +11,9 @@ FI_LICA(
   n = 20,
   flica_niter2 = 1000,
   rescale = TRUE,
-  re_completer = NULL
+  re_completer = NULL,
+  seed1 = 1,
+  seed2 = 1
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ FI_LICA(
 \item{rescale}{rescale H and XW (default is TRUE)}
 
 \item{re_completer}{results from completer case analysis. Default is NULL and completer case analysis will be run and saved during the process; otherwise, the given results will be used.}
+
+\item{seed1}{seed for E generation for FI-LICA's Step 1. Default is 1.}
+
+\item{seed2}{seed for E generation for FI-LICA's Step 2. Default is 1.}
 }
 \value{
 The resulting list includes the estimated results, the convergence measures for H and for XW, and the dF history from FI-LICA

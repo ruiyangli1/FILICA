@@ -4,7 +4,15 @@
 \alias{filica_step2}
 \title{Function to run Step 2 in FI-LICA}
 \usage{
-filica_step2(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE)
+filica_step2(
+  n,
+  ncomp,
+  flica_niter2,
+  H_prev,
+  XW_prev,
+  rescale = TRUE,
+  seed2 = 1
+)
 }
 \arguments{
 \item{n}{number of FI-LICA updates}
@@ -18,6 +26,8 @@ filica_step2(n, ncomp, flica_niter2, H_prev, XW_prev, rescale = TRUE)
 \item{XW_prev}{the estimated XW from Step 1}
 
 \item{rescale}{rescale H and XW (default is TRUE)}
+
+\item{seed2}{seed for E generation for FI-LICA's Step 2. Default is 1.}
 }
 \value{
 The resulting list includes the estimated results, convergence measure for H and for XW, and the dF history from Step 2 in FI-LICA
